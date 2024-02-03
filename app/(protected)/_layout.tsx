@@ -1,6 +1,7 @@
 import { Redirect, Stack } from "expo-router";
 import { Text } from "react-native";
 
+import { View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useSession } from "@/providers/session_provider";
 
@@ -9,7 +10,11 @@ export default function AppLayout() {
 
   // You can keep the splash screen open, or render a loading screen like we do here.
   if (isLoading) {
-    return <Text>Cargando...</Text>;
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ fontSize: 16, color: "#fff" }}>Cargando...</Text>
+      </View>
+    );
   }
 
   // Only require authentication within the (app) group's layout as users

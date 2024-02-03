@@ -1,14 +1,14 @@
-import { router } from "expo-router";
+// import { router } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 import Colors from "@/constants/Colors";
-import { useSession } from "@/providers/session_provider";
+// import { useSession } from "@/providers/session_provider";
 
 export default function SignIn() {
-  const { signIn } = useSession();
+  // const { signIn } = useSession();
   return (
     <View style={styles.mainView}>
-      <Text
+      {/* <Text
         style={styles.text}
         onPress={() => {
           signIn();
@@ -18,7 +18,10 @@ export default function SignIn() {
         }}
       >
         Sign In
-      </Text>
+      </Text> */}
+
+      <Text style={[styles.logo, styles.text]}>Dooit</Text>
+      <Text style={[styles.slogan, styles.text]}>Tus notas, tu app.</Text>
     </View>
   );
 }
@@ -32,5 +35,13 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "#fff",
+    fontFamily: "Comfortaa",
+  },
+  logo: {
+    fontSize: 48,
+    fontWeight: "bold",
+  },
+  slogan: {
+    fontSize: 20,
   },
 });

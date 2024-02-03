@@ -1,14 +1,14 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
-  // DarkTheme,
+  DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { useEffect } from "react";
+import { useColorScheme } from "react-native";
 
-// import { useColorScheme } from "react-native";
 import { SessionProvider } from "@/providers/session_provider";
 
 export {
@@ -27,6 +27,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    Comfortaa: require("../assets/fonts/Comfortaa-Regular.ttf"),
     ...FontAwesome.font,
   });
 
@@ -49,12 +50,11 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  // const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme();
 
   return (
-    // <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
     <SessionProvider>
-      <ThemeProvider value={DefaultTheme}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Slot />
         {/* <Stack>
         <Stack.Screen name="login" />
