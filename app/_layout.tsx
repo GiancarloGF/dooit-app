@@ -9,7 +9,7 @@ import { Slot, SplashScreen } from "expo-router";
 import { useEffect } from "react";
 
 // import { useColorScheme } from "react-native";
-import { SessionProvider } from "../providers/session_provider";
+import { SessionProvider } from "@/providers/session_provider";
 
 export {
   // Catch any errors thrown by the Layout component.

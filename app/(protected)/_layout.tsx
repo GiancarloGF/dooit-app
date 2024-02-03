@@ -1,7 +1,8 @@
 import { Redirect, Stack } from "expo-router";
 import { Text } from "react-native";
 
-import { useSession } from "../../providers/session_provider";
+import Colors from "@/constants/Colors";
+import { useSession } from "@/providers/session_provider";
 
 export default function AppLayout() {
   const { session, isLoading } = useSession();
@@ -24,7 +25,7 @@ export default function AppLayout() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#f4511e",
+          backgroundColor: Colors.primary,
         },
         headerTintColor: "#fff",
         headerTitleStyle: {
