@@ -20,7 +20,7 @@ const NoteItem: React.FC<Props> = ({
   onDeletePressed,
 }) => {
   //   const [_isCompleted, setIsCompleted] = useState<boolean>(isCompleted);
-  const textColor = useThemeColor(null, "text");
+  const textColor = useThemeColor(undefined, "text");
   return (
     <View style={styles.container}>
       <Pressable onPress={onCheckboxPressed}>

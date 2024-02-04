@@ -11,8 +11,8 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 type Props = TouchableOpacityProps;
 
 const FloatingActionButton: React.FC<Props> = (props) => {
-  const backgroundColor = useThemeColor(null, "floatingButton");
-  const iconColor = useThemeColor(null, "background");
+  const backgroundColor = useThemeColor(undefined, "floatingButton");
+  const iconColor = useThemeColor(undefined, "background");
   return (
     <TouchableOpacity
       style={[styles.container, { backgroundColor }]}

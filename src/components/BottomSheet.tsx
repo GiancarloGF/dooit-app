@@ -1,19 +1,22 @@
-import { useThemeColor } from "@/hooks/useThemeColor";
 import GorhomBottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetProps,
   useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import React, { useCallback, useMemo } from "react";
-import { StyleSheet, View } from "react-native";
+
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 type Props = {
-  content: React.ReactNode;
+  children: React.ReactNode;
   buttonSheetRef: React.Ref<BottomSheetMethods>;
+  snapPoints?: BottomSheetProps["snapPoints"];
+  onClose?: () => void;
 };
 const BottomSheet: React.FC<Props> = (props) => {
-  const { content, buttonSheetRef } = props;
-  const backgroundColor = useThemeColor(null, "background");
+  const { children, buttonSheetRef, onClose } = props;
+  const backgroundColor = useThemeColor(undefined, "background");
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -35,35 +38,31 @@ const BottomSheet: React.FC<Props> = (props) => {
     stiffness: 300,
   });
 
-  const snapPoints = useMemo(() => ["60%"], []);
+  const snapPointsValues = useMemo(() => ["50%"], []);
 
   return (
     <GorhomBottomSheet
       ref={buttonSheetRef}
       //   ref={bottomSheetRef}
       index={-1}
-      snapPoints={snapPoints}
+      snapPoints={snapPointsValues}
       enablePanDownToClose
       animationConfigs={animationConfigs}
       backdropComponent={renderBackdrop}
       //   onChange={handleSheetChanges}
       backgroundStyle={{ backgroundColor }}
+      onClose={onClose}
+      keyboardBehavior="fillParent"
       //   handleStyle={{
       //     backgroundColor,
       //     borderTopLeftRadius: 15,
       //     borderTopRightRadius: 15,
       //   }}
     >
-      <View style={[styles.contentContainer]}>{content}</View>
+      {/* <View style={[styles.contentContainer]}>{children}</View> */}
+      {children}
     </GorhomBottomSheet>
   );
 };
 
 export default BottomSheet;
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
-});

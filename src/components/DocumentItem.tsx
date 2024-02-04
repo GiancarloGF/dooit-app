@@ -3,8 +3,9 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import Colors from "@/constants/Colors";
 import { Text } from "./Text";
+
+import Colors from "@/constants/Colors";
 
 const DocumentItem = () => {
   const router = useRouter();

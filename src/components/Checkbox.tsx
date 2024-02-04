@@ -8,8 +8,8 @@ type Props = {
   isChecked?: boolean;
 };
 const Checkbox: React.FC<Props> = ({ isChecked = false }) => {
-  const mainColor = useThemeColor(null, "text");
-  const secondaryColor = useThemeColor(null, "background");
+  const mainColor = useThemeColor(undefined, "text");
+  const secondaryColor = useThemeColor(undefined, "background");
 
   return (
     <View
