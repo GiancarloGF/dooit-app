@@ -2,24 +2,30 @@ import Feather from "@expo/vector-icons/Feather";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-import Colors from "@/constants/Colors";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 type Props = {
   isChecked?: boolean;
 };
 const Checkbox: React.FC<Props> = ({ isChecked = false }) => {
+  const mainColor = useThemeColor(null, "text");
+  const secondaryColor = useThemeColor(null, "background");
+
   return (
     <View
       style={[
         styles.container,
-        { backgroundColor: isChecked ? Colors.primary : "transparent" },
+        {
+          backgroundColor: isChecked ? mainColor : "transparent",
+          borderColor: mainColor,
+        },
       ]}
     >
       <Feather
         name="check"
         size={16}
         style={{
-          color: isChecked ? "white" : "transparent",
+          color: isChecked ? secondaryColor : "transparent",
         }}
       />
     </View>
@@ -35,7 +41,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 5,
     borderWidth: 2,
-    borderColor: Colors.primary,
+
     padding: 2,
   },
 });

@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import React from "react";
 import { FlatList, StyleSheet } from "react-native";
 
+import FloatingActionButton from "@/components/FloatingActionButton";
 import HeaderTitle from "@/components/HeaderTitle";
 import NoteItem from "@/components/NoteItem";
 import SectionHeader from "@/components/SectionHeader";
@@ -79,6 +80,7 @@ const NoteBookScreen = () => {
         <DocumentItem />
         <DocumentItem />
       </View> */}
+      <FloatingActionButton />
     </ViewThemed>
   );
 };

@@ -8,7 +8,7 @@ import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
-
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SessionProvider } from "@/providers/session_provider";
 
 export {
@@ -55,8 +55,9 @@ function RootLayoutNav() {
   return (
     <SessionProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Slot />
-        {/* <Stack>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <Slot />
+          {/* <Stack>
         <Stack.Screen name="login" />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
@@ -64,6 +65,7 @@ function RootLayoutNav() {
         options={{ presentation: "modal", title: "Mi modal" }}
         />
       </Stack> */}
+        </GestureHandlerRootView>
       </ThemeProvider>
     </SessionProvider>
   );

@@ -8,6 +8,7 @@ import SectionHeader from "@/components/SectionHeader";
 import { Text } from "@/components/Text";
 import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
+import FloatingActionButton from "@/components/FloatingActionButton";
 
 const FolderScreen = () => {
   const router = useRouter();
@@ -50,6 +51,7 @@ const FolderScreen = () => {
           </View>
         </Pressable>
       </View>
+      <FloatingActionButton />
     </ViewThemed>
   );
 };

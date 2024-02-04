@@ -5,6 +5,8 @@ import { Pressable, StyleSheet, View } from "react-native";
 import Checkbox from "./Checkbox";
 import { Text } from "./Text";
 
+import { useThemeColor } from "@/hooks/useThemeColor";
+
 type Props = {
   isCompleted: boolean;
   title: string;
@@ -18,24 +20,27 @@ const NoteItem: React.FC<Props> = ({
   onDeletePressed,
 }) => {
   //   const [_isCompleted, setIsCompleted] = useState<boolean>(isCompleted);
+  const textColor = useThemeColor(null, "text");
   return (
     <View style={styles.container}>
       <Pressable onPress={onCheckboxPressed}>
         <Checkbox isChecked={isCompleted} />
       </Pressable>
-      <Text
-        style={[
-          styles.title,
-          {
-            textDecorationLine: isCompleted ? "line-through" : "none",
-          },
-        ]}
-      >
-        {title}
-      </Text>
-      <View style={{ flex: 1 }} />
+      <View style={{ flex: 1 }}>
+        <Text
+          style={[
+            styles.title,
+            {
+              textDecorationLine: isCompleted ? "line-through" : "none",
+            },
+          ]}
+        >
+          {title}
+        </Text>
+      </View>
+      {/* <View style={{ flex: 1 }} /> */}
       <Pressable onPress={onDeletePressed}>
-        <Feather name="x" size={20} />
+        <Feather name="x" size={20} color={textColor} />
       </Pressable>
     </View>
   );
@@ -56,5 +61,6 @@ const styles = StyleSheet.create({
   title: {
     textDecorationLine: "line-through",
     fontSize: 20,
+    fontFamily: "SpaceMono",
   },
 });
