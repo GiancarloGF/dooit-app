@@ -8,6 +8,7 @@ import { useSession } from "@/providers/session_provider";
 
 export default function SignIn() {
   const { signIn } = useSession();
+
   function onSignIn() {
     signIn();
     // Navigate after signing in. You may want to tweak this to ensure sign-in is
