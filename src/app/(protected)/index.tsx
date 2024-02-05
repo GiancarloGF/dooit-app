@@ -1,5 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
-import { BottomSheetBackdrop, BottomSheetModal } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { Stack } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { StatusBar, StyleSheet, View } from "react-native";
@@ -17,35 +17,14 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { useSession } from "@/providers/session_provider";
 
 const HomeScreen = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const { signOut } = useSession();
-  const { keyboardShown, hideKeyboard } = useKeyboard();
-  // ref
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
-
-  const snapPointsValues = useMemo(() => {
-    if (keyboardShown) {
-      return ["55%"];
-    } else {
-      return ["35%"];
-    }
-  }, [keyboardShown]);
-
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        disappearsOnIndex={-1}
-        appearsOnIndex={1}
-        pressBehavior="close"
-        {...props}
-      />
-    ),
-    [],
-  );
 
   function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
     console.log("Crear carpeta");
-    bottomSheetRef.current?.present();
+    // bottomSheetRef.current?.present();
+    setIsOpen(true);
   }
 
   function onSignOut() {
@@ -74,8 +53,8 @@ const HomeScreen = () => {
         </View>
         <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>
-      <BottomSheetModal
-        ref={bottomSheetRef}
+      {/* <BottomSheetModal
+        // ref={bottomSheetRef}
         index={0}
         snapPoints={snapPointsValues}
         enablePanDownToClose
@@ -86,12 +65,65 @@ const HomeScreen = () => {
           closeBottomSheet={() => bottomSheetRef.current?.dismiss()}
           hideKeyboard={hideKeyboard}
         />
-      </BottomSheetModal>
+      </BottomSheetModal> */}
+      {isOpen ? (
+        <CustomBottomSheet onCloseBottomSheet={() => setIsOpen(false)} />
+      ) : null}
     </>
   );
 };
 
 export default HomeScreen;
+
+const CustomBottomSheet = ({
+  onCloseBottomSheet,
+}: {
+  onCloseBottomSheet: () => void;
+}) => {
+  const backgroundColor = useThemeColor(undefined, "background");
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const { keyboardShown, hideKeyboard } = useKeyboard();
+  const snapPointsValues = useMemo(() => {
+    if (keyboardShown) {
+      return ["65%"];
+    } else {
+      return ["35%"];
+    }
+  }, [keyboardShown]);
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        disappearsOnIndex={-1}
+        appearsOnIndex={1}
+        pressBehavior="close"
+        {...props}
+      />
+    ),
+    [],
+  );
+  return (
+    <BottomSheet
+      ref={bottomSheetRef}
+      snapPoints={snapPointsValues}
+      backdropComponent={renderBackdrop}
+      enablePanDownToClose
+      backgroundStyle={{ backgroundColor }}
+      onChange={(index) => {
+        if (index === -1) {
+          onCloseBottomSheet();
+        }
+      }}
+    >
+      <BottomSheetContent
+        closeBottomSheet={() => {
+          bottomSheetRef.current?.collapse();
+          onCloseBottomSheet();
+        }}
+        hideKeyboard={hideKeyboard}
+      />
+    </BottomSheet>
+  );
+};
 
 const BottomSheetContent = ({
   closeBottomSheet,

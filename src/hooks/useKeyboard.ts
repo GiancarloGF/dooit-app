@@ -56,6 +56,7 @@ export function useKeyboard() {
     ];
 
     return () => {
+      console.log("En clear useEffect de useKeyboard");
       subscriptions.forEach((subscription) => subscription.remove());
     };
   }, []);

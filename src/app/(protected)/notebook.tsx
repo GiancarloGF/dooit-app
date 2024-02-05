@@ -1,5 +1,8 @@
 import Feather from "@expo/vector-icons/Feather";
-import { BottomSheetBackdrop, BottomSheetModal } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  // BottomSheetModal,
+} from "@gorhom/bottom-sheet";
 import { Stack } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
@@ -36,29 +39,7 @@ const DATA = [
 
 const NoteBookScreen = () => {
   const [notes, setNotes] = React.useState(DATA);
-  const { keyboardShown, hideKeyboard } = useKeyboard();
-  // ref
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
-
-  const snapPointsValues = useMemo(() => {
-    if (keyboardShown) {
-      return ["55%"];
-    } else {
-      return ["35%"];
-    }
-  }, [keyboardShown]);
-
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        disappearsOnIndex={-1}
-        appearsOnIndex={1}
-        pressBehavior="close"
-        {...props}
-      />
-    ),
-    [],
-  );
+  const [isOpen, setIsOpen] = useState(false);
 
   function onCompleteNote(noteId: string): void {
     // TODO: Implementar creación de carpetas
@@ -80,10 +61,11 @@ const NoteBookScreen = () => {
     setNotes(newNotes);
   }
 
-  function onCreateNew(): void {
+  function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
-    console.log("Crear Nota");
-    bottomSheetRef.current?.present();
+    console.log("Crear carpeta");
+    // bottomSheetRef.current?.present();
+    setIsOpen(true);
   }
 
   return (
@@ -116,25 +98,66 @@ const NoteBookScreen = () => {
           <DocumentItem />
           <DocumentItem />
         </View> */}
-        <FloatingActionButton onPress={onCreateNew} />
+        <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>
-      <BottomSheetModal
-        ref={bottomSheetRef}
-        index={0}
-        snapPoints={snapPointsValues}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        <BottomSheetContent
-          closeBottomSheet={() => bottomSheetRef.current?.dismiss()}
-          hideKeyboard={hideKeyboard}
-        />
-      </BottomSheetModal>
+      {isOpen ? (
+        <CustomBottomSheet onCloseBottomSheet={() => setIsOpen(false)} />
+      ) : null}
     </>
   );
 };
 
 export default NoteBookScreen;
+
+const CustomBottomSheet = ({
+  onCloseBottomSheet,
+}: {
+  onCloseBottomSheet: () => void;
+}) => {
+  const backgroundColor = useThemeColor(undefined, "background");
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const { keyboardShown, hideKeyboard } = useKeyboard();
+  const snapPointsValues = useMemo(() => {
+    if (keyboardShown) {
+      return ["65%"];
+    } else {
+      return ["35%"];
+    }
+  }, [keyboardShown]);
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        disappearsOnIndex={-1}
+        appearsOnIndex={1}
+        pressBehavior="close"
+        {...props}
+      />
+    ),
+    [],
+  );
+  return (
+    <BottomSheet
+      ref={bottomSheetRef}
+      snapPoints={snapPointsValues}
+      backdropComponent={renderBackdrop}
+      enablePanDownToClose
+      backgroundStyle={{ backgroundColor }}
+      onChange={(index) => {
+        if (index === -1) {
+          onCloseBottomSheet();
+        }
+      }}
+    >
+      <BottomSheetContent
+        closeBottomSheet={() => {
+          bottomSheetRef.current?.collapse();
+          onCloseBottomSheet();
+        }}
+        hideKeyboard={hideKeyboard}
+      />
+    </BottomSheet>
+  );
+};
 
 const BottomSheetContent = ({
   closeBottomSheet,
@@ -161,7 +184,7 @@ const BottomSheetContent = ({
     <View style={styles.sheetContainer}>
       <View style={styles.sheetHeader}>
         <Feather name="folder-plus" size={24} color={color} />
-        <Text style={styles.sheetHeaderTitle}>Nueva Nota</Text>
+        <Text style={styles.sheetHeaderTitle}>Nueva Carpeta</Text>
       </View>
       <View style={styles.sheetContent}>
         <TextInput label="Nombre" errorText={undefined} />
