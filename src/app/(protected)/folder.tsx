@@ -6,10 +6,12 @@ import BottomSheet, {
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { TouchableHighlight } from "react-native-gesture-handler";
 
 import Button from "@/components/Button";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import HeaderTitle from "@/components/HeaderTitle";
+import Modal from "@/components/Modal";
 import SectionHeader from "@/components/SectionHeader";
 import { Text } from "@/components/Text";
 import TextInput from "@/components/TextInput";
@@ -17,9 +19,12 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import AlertDialog from "@/components/AlertDialog";
 
 const FolderScreen = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const textColor = useThemeColor(undefined, "text");
   const router = useRouter();
 
   function onItemPressed() {
@@ -33,6 +38,10 @@ const FolderScreen = () => {
     setIsOpen(true);
   }
 
+  function onDelete(): void {
+    setModalVisible(true);
+  }
+
   return (
     <>
       <ViewThemed style={styles.mainView}>
@@ -40,6 +49,15 @@ const FolderScreen = () => {
           options={{
             headerTitle: () => (
               <HeaderTitle name="Mis Finanzas" type="Carpeta" />
+            ),
+            headerRight: () => (
+              <TouchableHighlight
+                onPress={onDelete}
+                style={styles.deleteButton}
+                underlayColor="#CBD5E1"
+              >
+                <Feather name="trash" size={20} color={textColor} />
+              </TouchableHighlight>
             ),
           }}
         />
@@ -91,6 +109,16 @@ const FolderScreen = () => {
       {isOpen ? (
         <CustomBottomSheet onCloseBottomSheet={() => setIsOpen(false)} />
       ) : null}
+      <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
+        <AlertDialog
+          onConfirm={() => setModalVisible(false)}
+          onDismiss={() => setModalVisible(false)}
+          title="¿Deseas eliminar esta carpeta?"
+          description="Esta acción no se puede deshacer"
+          confirmButtonLabel="Si, Eliminar"
+          dismissButtonLabel="No, Cancelar"
+        />
+      </Modal>
     </>
   );
 };
@@ -102,7 +130,6 @@ const CustomBottomSheet = ({
 }: {
   onCloseBottomSheet: () => void;
 }) => {
-  const backgroundColor = useThemeColor(undefined, "background");
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { keyboardShown, hideKeyboard } = useKeyboard();
   const snapPointsValues = useMemo(() => {
@@ -129,7 +156,7 @@ const CustomBottomSheet = ({
       snapPoints={snapPointsValues}
       backdropComponent={renderBackdrop}
       enablePanDownToClose
-      backgroundStyle={{ backgroundColor }}
+      backgroundStyle={{ backgroundColor: "#fff" }}
       onChange={(index) => {
         if (index === -1) {
           onCloseBottomSheet();
@@ -156,7 +183,6 @@ const BottomSheetContent = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // const { hideKeyboard } = useKeyboard();
-  const color = useThemeColor(undefined, "text");
 
   function onCreate() {
     setIsLoading(true);
@@ -171,14 +197,24 @@ const BottomSheetContent = ({
   return (
     <View style={styles.sheetContainer}>
       <View style={styles.sheetHeader}>
-        <Feather name="folder-plus" size={24} color={color} />
-        <Text style={styles.sheetHeaderTitle}>Nueva Carpeta</Text>
+        <Feather name="folder-plus" size={24} color={Colors.primary} />
+        <Text style={styles.sheetHeaderTitle}>Nueva Libreta</Text>
       </View>
       <View style={styles.sheetContent}>
-        <TextInput label="Nombre" errorText={undefined} />
+        <TextInput
+          label="Nombre"
+          errorText={undefined}
+          labelColor={Colors.primary}
+        />
       </View>
       {/* <View style={{ flex: 1 }} /> */}
-      <Button label="Crear" isLoading={isLoading} onPress={onCreate} />
+      <Button
+        label="Crear"
+        isLoading={isLoading}
+        onPress={onCreate}
+        style={{ backgroundColor: Colors.primary }}
+        labelColor="white"
+      />
     </View>
   );
 };
@@ -233,6 +269,7 @@ const styles = StyleSheet.create({
   },
   sheetHeaderTitle: {
     fontSize: 20,
+    color: Colors.primary,
   },
   sheetContent: {
     flex: 1,
@@ -241,4 +278,9 @@ const styles = StyleSheet.create({
   sheetText: {
     color: Colors.primary,
   },
+  deleteButton: {
+    padding: 15,
+    borderRadius: 100,
+  },
+  //Modal
 });

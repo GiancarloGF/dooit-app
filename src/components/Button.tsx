@@ -1,31 +1,35 @@
-import React, { PropsWithChildren } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   GestureResponderEvent,
   StyleSheet,
   TouchableOpacity,
+  TouchableOpacityProps,
 } from "react-native";
 
 import { Text } from "./Text";
 
 import { useThemeColor } from "@/hooks/useThemeColor";
 
-type ButtonProps = PropsWithChildren<{
+type ButtonProps = TouchableOpacityProps & {
   onPress?: ((event: GestureResponderEvent) => void) | undefined;
   label: string;
   isLoading?: boolean;
   disabled?: boolean;
-}>;
+  labelColor?: string;
+};
 
 function Button({
   onPress,
   label,
   isLoading = false,
   disabled = false,
+  labelColor,
+  style,
 }: ButtonProps): React.JSX.Element {
   const isDisabled = onPress === undefined || disabled;
   const backgroundColor = useThemeColor(undefined, "backgroundAccent");
-  const textColor = useThemeColor(undefined, "textAccent");
+  const themedLabelColor = useThemeColor(undefined, "textAccent");
 
   return (
     <TouchableOpacity
@@ -37,12 +41,15 @@ function Button({
         {
           backgroundColor: isDisabled ? "gray" : backgroundColor,
         },
+        style,
       ]}
     >
       {isLoading ? (
-        <ActivityIndicator color={textColor} />
+        <ActivityIndicator color={themedLabelColor} />
       ) : (
-        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+        <Text style={[styles.label, { color: labelColor ?? themedLabelColor }]}>
+          {label}
+        </Text>
       )}
     </TouchableOpacity>
   );

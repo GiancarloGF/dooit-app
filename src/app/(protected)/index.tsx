@@ -13,7 +13,6 @@ import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { useSession } from "@/providers/session_provider";
 
 const HomeScreen = () => {
@@ -80,7 +79,6 @@ const CustomBottomSheet = ({
 }: {
   onCloseBottomSheet: () => void;
 }) => {
-  const backgroundColor = useThemeColor(undefined, "background");
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { keyboardShown, hideKeyboard } = useKeyboard();
   const snapPointsValues = useMemo(() => {
@@ -107,7 +105,7 @@ const CustomBottomSheet = ({
       snapPoints={snapPointsValues}
       backdropComponent={renderBackdrop}
       enablePanDownToClose
-      backgroundStyle={{ backgroundColor }}
+      backgroundStyle={{ backgroundColor: "#fff" }}
       onChange={(index) => {
         if (index === -1) {
           onCloseBottomSheet();
@@ -134,7 +132,6 @@ const BottomSheetContent = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // const { hideKeyboard } = useKeyboard();
-  const color = useThemeColor(undefined, "text");
 
   function onCreate() {
     setIsLoading(true);
@@ -149,14 +146,24 @@ const BottomSheetContent = ({
   return (
     <View style={styles.sheetContainer}>
       <View style={styles.sheetHeader}>
-        <Feather name="folder-plus" size={24} color={color} />
+        <Feather name="folder-plus" size={24} color={Colors.primary} />
         <Text style={styles.sheetHeaderTitle}>Nueva Carpeta</Text>
       </View>
       <View style={styles.sheetContent}>
-        <TextInput label="Nombre" errorText={undefined} />
+        <TextInput
+          label="Nombre"
+          errorText={undefined}
+          labelColor={Colors.primary}
+        />
       </View>
       {/* <View style={{ flex: 1 }} /> */}
-      <Button label="Crear" isLoading={isLoading} onPress={onCreate} />
+      <Button
+        label="Crear"
+        isLoading={isLoading}
+        onPress={onCreate}
+        style={{ backgroundColor: Colors.primary }}
+        labelColor="white"
+      />
     </View>
   );
 };
@@ -202,6 +209,7 @@ const styles = StyleSheet.create({
   },
   sheetHeaderTitle: {
     fontSize: 20,
+    color: Colors.primary,
   },
   sheetContent: {
     flex: 1,

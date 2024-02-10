@@ -8,27 +8,37 @@ import {
 
 import { Text } from "./Text";
 
+import Colors from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 type Props = TextInputProps & {
   label: string;
   errorText?: string;
+  labelColor?: string;
 };
 
-function TextInput({ label, errorText, ...props }: Props): React.JSX.Element {
+function TextInput({
+  label,
+  errorText,
+  labelColor,
+  ...props
+}: Props): React.JSX.Element {
   const borderColor = useThemeColor(undefined, "inputBorder");
   const textColor = useThemeColor(undefined, "text");
   return (
     <View style={styles.inputContainer}>
       <Text
-        style={[styles.labelText, { color: errorText ? "red" : textColor }]}
+        style={[
+          styles.labelText,
+          { color: errorText ? "red" : labelColor ?? textColor },
+        ]}
       >
         {label}
       </Text>
       <RNTextInput
         // placeholder={placeholder}
         // placeholderTextColor={theme === "dark" ? "white" : "black"}
-        selectionColor="red"
+        selectionColor={Colors.primary}
         style={[
           styles.input,
           {

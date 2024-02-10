@@ -18,6 +18,9 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { TouchableHighlight } from "react-native-gesture-handler";
+import Modal from "@/components/Modal";
+import AlertDialog from "@/components/AlertDialog";
 
 const DATA = [
   {
@@ -40,6 +43,8 @@ const DATA = [
 const NoteBookScreen = () => {
   const [notes, setNotes] = React.useState(DATA);
   const [isOpen, setIsOpen] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const textColor = useThemeColor(undefined, "text");
 
   function onCompleteNote(noteId: string): void {
     // TODO: Implementar creación de carpetas
@@ -68,6 +73,10 @@ const NoteBookScreen = () => {
     setIsOpen(true);
   }
 
+  function onDelete(): void {
+    setModalVisible(true);
+  }
+
   return (
     <>
       <ViewThemed style={styles.mainView}>
@@ -75,6 +84,15 @@ const NoteBookScreen = () => {
           options={{
             headerTitle: () => (
               <HeaderTitle name="Gastos Diarios" type="Libreta" />
+            ),
+            headerRight: () => (
+              <TouchableHighlight
+                onPress={onDelete}
+                style={styles.deleteButton}
+                underlayColor="#CBD5E1"
+              >
+                <Feather name="trash" size={20} color={textColor} />
+              </TouchableHighlight>
             ),
           }}
         />
@@ -103,6 +121,16 @@ const NoteBookScreen = () => {
       {isOpen ? (
         <CustomBottomSheet onCloseBottomSheet={() => setIsOpen(false)} />
       ) : null}
+      <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
+        <AlertDialog
+          onConfirm={() => setModalVisible(false)}
+          onDismiss={() => setModalVisible(false)}
+          title="¿Deseas eliminar esta libreta?"
+          description="Esta acción no se puede deshacer"
+          confirmButtonLabel="Si, Eliminar"
+          dismissButtonLabel="No, Cancelar"
+        />
+      </Modal>
     </>
   );
 };
@@ -114,7 +142,6 @@ const CustomBottomSheet = ({
 }: {
   onCloseBottomSheet: () => void;
 }) => {
-  const backgroundColor = useThemeColor(undefined, "background");
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { keyboardShown, hideKeyboard } = useKeyboard();
   const snapPointsValues = useMemo(() => {
@@ -141,7 +168,7 @@ const CustomBottomSheet = ({
       snapPoints={snapPointsValues}
       backdropComponent={renderBackdrop}
       enablePanDownToClose
-      backgroundStyle={{ backgroundColor }}
+      backgroundStyle={{ backgroundColor: "#fff" }}
       onChange={(index) => {
         if (index === -1) {
           onCloseBottomSheet();
@@ -168,7 +195,6 @@ const BottomSheetContent = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // const { hideKeyboard } = useKeyboard();
-  const color = useThemeColor(undefined, "text");
 
   function onCreate() {
     setIsLoading(true);
@@ -183,14 +209,24 @@ const BottomSheetContent = ({
   return (
     <View style={styles.sheetContainer}>
       <View style={styles.sheetHeader}>
-        <Feather name="folder-plus" size={24} color={color} />
-        <Text style={styles.sheetHeaderTitle}>Nueva Carpeta</Text>
+        <Feather name="folder-plus" size={24} color={Colors.primary} />
+        <Text style={styles.sheetHeaderTitle}>Nueva Nota</Text>
       </View>
       <View style={styles.sheetContent}>
-        <TextInput label="Nombre" errorText={undefined} />
+        <TextInput
+          label="Nombre"
+          errorText={undefined}
+          labelColor={Colors.primary}
+        />
       </View>
       {/* <View style={{ flex: 1 }} /> */}
-      <Button label="Crear" isLoading={isLoading} onPress={onCreate} />
+      <Button
+        label="Crear"
+        isLoading={isLoading}
+        onPress={onCreate}
+        labelColor="white"
+        style={{ backgroundColor: Colors.primary }}
+      />
     </View>
   );
 };
@@ -227,6 +263,7 @@ const styles = StyleSheet.create({
   },
   sheetHeaderTitle: {
     fontSize: 20,
+    color: Colors.primary,
   },
   sheetContent: {
     flex: 1,
@@ -247,5 +284,9 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: "center",
+  },
+  deleteButton: {
+    padding: 15,
+    borderRadius: 100,
   },
 });
