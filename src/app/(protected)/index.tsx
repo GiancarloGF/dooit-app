@@ -4,6 +4,7 @@ import { Link, Stack } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Pressable, StatusBar, StyleSheet, View } from "react-native";
 
+import Avatar from "@/components/Avatar";
 import Button from "@/components/Button";
 import DocumentItem from "@/components/DocumentItem";
 import FloatingActionButton from "@/components/FloatingActionButton";
@@ -13,11 +14,9 @@ import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
-// import { useSession } from "@/providers/session_provider";
 
 const HomeScreen = () => {
   const [isOpen, setIsOpen] = useState(false);
-  // const { signOut } = useSession();
 
   function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
@@ -26,10 +25,6 @@ const HomeScreen = () => {
     setIsOpen(true);
   }
 
-  // function onAvatarPressed() {
-  //   // signOut();
-  // }
-
   return (
     <>
       <ViewThemed style={styles.mainView}>
@@ -37,17 +32,13 @@ const HomeScreen = () => {
         <Stack.Screen
           options={{
             title: "Dooit App",
-            // headerRight: () => (
-            //   <Text style={styles.logoutText} onPress={onSignOut}>
-            //     Cerrar sesión
-            //   </Text>
-            // ),
             headerRight: () => (
               <Link href="/menu" asChild>
                 <Pressable>
-                  <View style={styles.userAvatar}>
-                    <Text style={styles.userAvatarInitials}>GG</Text>
-                  </View>
+                  <Avatar
+                    containerStyle={{ backgroundColor: "white" }}
+                    textStyle={{ color: Colors.primary }}
+                  />
                 </Pressable>
               </Link>
             ),

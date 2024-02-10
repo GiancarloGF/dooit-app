@@ -192,7 +192,7 @@ const BottomSheetContent = ({
   return (
     <View style={styles.sheetContainer}>
       <View style={styles.sheetHeader}>
-        <Feather name="folder-plus" size={24} color={Colors.primary} />
+        <Feather name="file-plus" size={24} color={Colors.primary} />
         <Text style={styles.sheetHeaderTitle}>Nueva Libreta</Text>
       </View>
       <View style={styles.sheetContent}>
