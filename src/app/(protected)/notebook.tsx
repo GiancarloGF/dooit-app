@@ -1,15 +1,15 @@
 import Feather from "@expo/vector-icons/Feather";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  // BottomSheetModal,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { Stack } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
+import { TouchableHighlight } from "react-native-gesture-handler";
 
+import AlertDialog from "@/components/AlertDialog";
 import Button from "@/components/Button";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import HeaderTitle from "@/components/HeaderTitle";
+import Modal from "@/components/Modal";
 import NoteItem from "@/components/NoteItem";
 import SectionHeader from "@/components/SectionHeader";
 import { Text } from "@/components/Text";
@@ -17,10 +17,6 @@ import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
-import { useThemeColor } from "@/hooks/useThemeColor";
-import { TouchableHighlight } from "react-native-gesture-handler";
-import Modal from "@/components/Modal";
-import AlertDialog from "@/components/AlertDialog";
 
 const DATA = [
   {
@@ -44,7 +40,6 @@ const NoteBookScreen = () => {
   const [notes, setNotes] = React.useState(DATA);
   const [isOpen, setIsOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const textColor = useThemeColor(undefined, "text");
 
   function onCompleteNote(noteId: string): void {
     // TODO: Implementar creación de carpetas
@@ -91,7 +86,7 @@ const NoteBookScreen = () => {
                 style={styles.deleteButton}
                 underlayColor="#CBD5E1"
               >
-                <Feather name="trash" size={20} color={textColor} />
+                <Feather name="trash" size={20} color={Colors.secondary} />
               </TouchableHighlight>
             ),
           }}

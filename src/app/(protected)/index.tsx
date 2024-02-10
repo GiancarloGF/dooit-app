@@ -1,8 +1,8 @@
 import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
-import { Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { StatusBar, StyleSheet, View } from "react-native";
+import { Pressable, StatusBar, StyleSheet, View } from "react-native";
 
 import Button from "@/components/Button";
 import DocumentItem from "@/components/DocumentItem";
@@ -13,11 +13,11 @@ import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
-import { useSession } from "@/providers/session_provider";
+// import { useSession } from "@/providers/session_provider";
 
 const HomeScreen = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { signOut } = useSession();
+  // const { signOut } = useSession();
 
   function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
@@ -26,9 +26,9 @@ const HomeScreen = () => {
     setIsOpen(true);
   }
 
-  function onSignOut() {
-    signOut();
-  }
+  // function onAvatarPressed() {
+  //   // signOut();
+  // }
 
   return (
     <>
@@ -37,10 +37,19 @@ const HomeScreen = () => {
         <Stack.Screen
           options={{
             title: "Dooit App",
+            // headerRight: () => (
+            //   <Text style={styles.logoutText} onPress={onSignOut}>
+            //     Cerrar sesión
+            //   </Text>
+            // ),
             headerRight: () => (
-              <Text style={styles.logoutText} onPress={onSignOut}>
-                Cerrar sesión
-              </Text>
+              <Link href="/menu" asChild>
+                <Pressable>
+                  <View style={styles.userAvatar}>
+                    <Text style={styles.userAvatarInitials}>GG</Text>
+                  </View>
+                </Pressable>
+              </Link>
             ),
           }}
         />
@@ -230,5 +239,17 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: "center",
+  },
+  //AVATAR
+  userAvatar: {
+    // width: 30,
+    // height: 30,
+    borderRadius: 100,
+    padding: 10,
+    backgroundColor: "#fff",
+  },
+  userAvatarInitials: {
+    color: Colors.primary,
+    fontFamily: "ComfortaaBold",
   },
 });
