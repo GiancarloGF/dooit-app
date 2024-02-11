@@ -21,6 +21,8 @@ function TextInput({
   label,
   errorText,
   labelColor,
+  selectionColor,
+  style,
   ...props
 }: Props): React.JSX.Element {
   const borderColor = useThemeColor(undefined, "inputBorder");
@@ -38,7 +40,7 @@ function TextInput({
       <RNTextInput
         // placeholder={placeholder}
         // placeholderTextColor={theme === "dark" ? "white" : "black"}
-        selectionColor={Colors.primary}
+        selectionColor={selectionColor ?? Colors.primary}
         style={[
           styles.input,
           {
@@ -46,6 +48,7 @@ function TextInput({
             borderColor: errorText ? "red" : borderColor,
             // backgroundColor: isDarkMode ? 'black' : 'white',
           },
+          style,
         ]}
         {...props}
         // value={value}

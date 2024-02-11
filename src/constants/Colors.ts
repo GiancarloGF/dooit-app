@@ -3,11 +3,13 @@ const tintColorDark = "#fff";
 const primaryColor = "#0F172A";
 const secondaryColor = "#fff";
 const ternaryColor = "#CBD5E1";
+const errorColor = "#ED3D5C";
 
 export default {
   primary: primaryColor,
   secondary: secondaryColor,
   ternary: ternaryColor,
+  error: errorColor,
   light: {
     primary: primaryColor,
     text: primaryColor,
