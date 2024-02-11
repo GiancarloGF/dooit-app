@@ -1,4 +1,6 @@
 import Feather from "@expo/vector-icons/Feather";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { Stack, useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
@@ -9,10 +11,28 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useSession } from "@/providers/session_provider";
+import { GetUserResDto } from "@/types/get_user_dto";
 
 const UserMenuScreen = () => {
   const router = useRouter();
-  const { signOut } = useSession();
+  const { signOut, userId, token } = useSession();
+
+  const { data } = useQuery<GetUserResDto>({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      const url = `http://192.168.18.20:3000/users/${userId}`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    },
+  });
+
+  const userData = data?.data;
+
   return (
     <ViewThemed style={styles.mainView}>
       <Stack.Screen
@@ -43,8 +63,8 @@ const UserMenuScreen = () => {
       <View style={styles.userInfoContainer}>
         <Avatar negative size={60} />
         <View style={styles.userAccessData}>
-          <Text style={styles.userName}>Giancarlo Guerra Farfán</Text>
-          <Text style={styles.userEmail}>gian.guerra23@gmail.com</Text>
+          <Text style={styles.userName}>{userData?.username ?? ""}</Text>
+          <Text style={styles.userEmail}>{userData?.email ?? ""}</Text>
         </View>
       </View>
 
