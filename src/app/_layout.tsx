@@ -5,6 +5,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { useEffect } from "react";
@@ -82,6 +83,8 @@ const toastConfig = {
   ),
 };
 
+const queryClient = new QueryClient();
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
@@ -89,17 +92,15 @@ function RootLayoutNav() {
     <SessionProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <BottomSheetModalProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <Slot />
-            <Toast config={toastConfig} />
-            {/* <Stack>
-        <Stack.Screen name="login" />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-        name="modal"
-        options={{ presentation: "modal", title: "Mi modal" }}
-        />
-      </Stack> */}
+          <GestureHandlerRootView
+            style={{
+              flex: 1,
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <Slot />
+              <Toast config={toastConfig} />
+            </QueryClientProvider>
           </GestureHandlerRootView>
         </BottomSheetModalProvider>
       </ThemeProvider>

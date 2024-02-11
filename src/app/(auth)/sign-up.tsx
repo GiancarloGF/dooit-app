@@ -1,8 +1,18 @@
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 import { Link, router } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Keyboard, StyleSheet, Text, View } from "react-native";
+import {
+  Keyboard,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  ScrollView,
+} from "react-native";
 import Toast from "react-native-toast-message";
 import * as yup from "yup";
 
@@ -14,7 +24,17 @@ import { useSession } from "@/providers/session_provider";
 
 const REQUIRED_ERROR_MSG = "Este campo es requerido";
 const EMAIL_ERROR_MSG = "Debe ser un correo electrónico válido";
+
+type SignUpResponse = {
+  message: string;
+  data: {
+    token: string;
+    userId: string;
+  };
+};
+
 type FormData = {
+  username: string;
   email: string;
   password: string;
   repeatedPassword: string;
@@ -22,13 +42,14 @@ type FormData = {
 
 const schema = yup
   .object({
+    username: yup.string().required(REQUIRED_ERROR_MSG),
     email: yup.string().required(REQUIRED_ERROR_MSG).email(EMAIL_ERROR_MSG),
     password: yup.string().required(REQUIRED_ERROR_MSG),
     repeatedPassword: yup.string().required(REQUIRED_ERROR_MSG),
   })
   .required();
 
-export default function SignIn() {
+export default function SignUpScreen() {
   const { signIn } = useSession();
 
   const {
@@ -42,34 +63,57 @@ export default function SignIn() {
   } = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
+      username: "",
       email: "",
       password: "",
       repeatedPassword: "",
     },
   });
 
+  const mutation = useMutation<
+    SignUpResponse,
+    Error,
+    { password: string; email: string; username: string },
+    unknown
+  >({
+    mutationFn: async (body) => {
+      console.log("body", body);
+      const response = await axios.post(
+        "http://192.168.18.20:3000/auth/register",
+        body,
+      );
+
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log("on success data", data);
+      // Invalidate and refetch
+      // queryClient.invalidateQueries({ queryKey: ["todos"] });
+      signIn(data.data.token, data.data.userId);
+
+      Toast.show({
+        type: "success",
+        text1: data.message,
+        text2: "Bienvenido 👋",
+      });
+
+      router.replace("/");
+    },
+  });
+
   const watchRepeatedPassword = watch("repeatedPassword");
 
-  const showToast = () => {
-    Toast.show({
-      type: "success",
-      text1: "¡Ingreso exitoso!",
-      text2: "Bienvenido 👋",
-    });
-  };
-
   const onSubmit = (data: FormData) => {
+    console.log("is form valid", isValid);
     if (!isValid) return;
     //hide keyboard
     Keyboard.dismiss();
     console.log("Form data", data);
-    signIn();
-    showToast();
-    //TODO: agregar snack notificación de inicio de sesión
-    // Navigate after signing in. You may want to tweak this to ensure sign-in is
-    // successful before navigating.
-
-    router.replace("/");
+    mutation.mutate({
+      password: getValues("password"),
+      email: getValues("email"),
+      username: getValues("username"),
+    });
   };
 
   function validatePasswords() {
@@ -97,81 +141,104 @@ export default function SignIn() {
   }, [watchRepeatedPassword]);
 
   return (
-    <View style={styles.mainView}>
-      <Logo />
-      <View style={styles.formContainer}>
-        <View style={styles.formHeader}>
-          <Text style={styles.formTitle}>Registro</Text>
-          <Text style={styles.formSubTitle}>Crear nueva cuenta</Text>
+    <ScrollView style={{ backgroundColor: Colors.primary }}>
+      <SafeAreaView style={styles.mainView}>
+        <View style={{ height: Platform.OS === "android" ? 40 : 0 }} />
+        <Logo />
+        <View style={styles.formContainer}>
+          <View style={styles.formHeader}>
+            <Text style={styles.formTitle}>Registro</Text>
+            <Text style={styles.formSubTitle}>Crear nueva cuenta</Text>
+          </View>
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Nombre de usuario"
+                labelColor={Colors.ternary}
+                selectionColor={Colors.ternary}
+                style={styles.formInput}
+                errorText={errors.username?.message}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+            name="username"
+          />
+          <View style={{ height: 10 }} />
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Email"
+                keyboardType="email-address"
+                labelColor={Colors.ternary}
+                selectionColor={Colors.ternary}
+                style={styles.formInput}
+                errorText={errors.email?.message}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+            name="email"
+          />
+          <View style={{ height: 10 }} />
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Contraseña"
+                secureTextEntry
+                labelColor={Colors.ternary}
+                selectionColor={Colors.ternary}
+                style={styles.formInput}
+                errorText={errors.password?.message}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+            name="password"
+          />
+          <View style={{ height: 10 }} />
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Repetir contraseña"
+                secureTextEntry
+                labelColor={Colors.ternary}
+                selectionColor={Colors.ternary}
+                style={styles.formInput}
+                errorText={errors.repeatedPassword?.message}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+            name="repeatedPassword"
+          />
+          <View style={{ height: 40 }} />
+          <Button
+            label="CREAR CUENTA"
+            labelColor={Colors.primary}
+            indicatorColor={Colors.primary}
+            style={styles.formButton}
+            onPress={handleSubmit(onSubmit)}
+            isLoading={mutation.isPending}
+          />
         </View>
-        <Controller
-          control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Email"
-              labelColor={Colors.ternary}
-              selectionColor={Colors.ternary}
-              style={styles.formInput}
-              errorText={errors.email?.message}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-          name="email"
-        />
-        <View style={{ height: 10 }} />
-        <Controller
-          control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Contraseña"
-              secureTextEntry
-              labelColor={Colors.ternary}
-              selectionColor={Colors.ternary}
-              style={styles.formInput}
-              errorText={errors.password?.message}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-          name="password"
-        />
-        <View style={{ height: 10 }} />
-        <Controller
-          control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Repetir contraseña"
-              secureTextEntry
-              labelColor={Colors.ternary}
-              selectionColor={Colors.ternary}
-              style={styles.formInput}
-              errorText={errors.repeatedPassword?.message}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-          name="repeatedPassword"
-        />
-        <View style={{ height: 40 }} />
-        <Button
-          label="CREAR CUENTA"
-          labelColor={Colors.primary}
-          style={styles.formButton}
-          onPress={handleSubmit(onSubmit)}
-        />
-      </View>
-      <View style={{ height: 10 }} />
-      <Text style={styles.signInText}>
-        ¿Ya tienes una cuenta?{" "}
-        <Link href="/sign-in" style={styles.link}>
-          Iniciar Sesión
-        </Link>
-      </Text>
-    </View>
+        <Text style={styles.signInText}>
+          ¿Ya tienes una cuenta?{" "}
+          <Link href="/sign-in" style={styles.link}>
+            Iniciar Sesión
+          </Link>
+        </Text>
+        <View style={{ height: 20 }} />
+      </SafeAreaView>
+    </ScrollView>
   );
 }
 
@@ -181,6 +248,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary,
+    paddingTop: 30,
   },
   text: {
     color: "#fff",
@@ -216,7 +284,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: "90%",
-    padding: 20,
+    padding: 15,
     marginTop: 20,
   },
   formButton: {

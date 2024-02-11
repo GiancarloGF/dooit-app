@@ -17,6 +17,7 @@ type ButtonProps = TouchableOpacityProps & {
   isLoading?: boolean;
   disabled?: boolean;
   labelColor?: string;
+  indicatorColor?: string;
 };
 
 function Button({
@@ -25,6 +26,7 @@ function Button({
   isLoading = false,
   disabled = false,
   labelColor,
+  indicatorColor,
   style,
 }: ButtonProps): React.JSX.Element {
   const isDisabled = onPress === undefined || disabled;
@@ -45,7 +47,7 @@ function Button({
       ]}
     >
       {isLoading ? (
-        <ActivityIndicator color={themedLabelColor} />
+        <ActivityIndicator color={indicatorColor ?? themedLabelColor} />
       ) : (
         <Text style={[styles.label, { color: labelColor ?? themedLabelColor }]}>
           {label}

@@ -14,9 +14,11 @@ import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
+import { useSession } from "@/providers/session_provider";
 
 const HomeScreen = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { userId } = useSession();
 
   function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
@@ -45,6 +47,7 @@ const HomeScreen = () => {
           }}
         />
         <Text style={styles.welcomeText}>👋 Hola, Giancarlo!</Text>
+        <Text>Id de usuario: {userId}</Text>
         <SectionHeader name="Carpetas" />
         <View style={styles.listItemsContainer}>
           <DocumentItem />

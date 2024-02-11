@@ -1,4 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 import { Link, router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Keyboard, StyleSheet, Text, View } from "react-native";
@@ -13,6 +15,22 @@ import { useSession } from "@/providers/session_provider";
 
 const REQUIRED_ERROR_MSG = "Este campo es requerido";
 const EMAIL_ERROR_MSG = "Debe ser un correo electrónico válido";
+
+// function loginFn(email: string, password: string) {
+//   return axios.post("http://localhost:3000/auth/login", {
+//     email: email,
+//     password: password,
+//   });
+// }
+
+type SignInResponse = {
+  message: string;
+  data: {
+    token: string;
+    userId: string;
+  };
+};
+
 type FormData = {
   email: string;
   password: string;
@@ -25,13 +43,15 @@ const schema = yup
   })
   .required();
 
-export default function SignIn() {
+export default function SignInScreen() {
   const { signIn } = useSession();
+  // const queryClient = useQueryClient();
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
+    getValues,
   } = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -40,25 +60,45 @@ export default function SignIn() {
     },
   });
 
-  const showToast = () => {
-    Toast.show({
-      type: "success",
-      text1: "¡Ingreso exitoso!",
-      text2: "Bienvenido 👋",
-    });
-  };
+  const mutation = useMutation<
+    SignInResponse,
+    Error,
+    { password: string; email: string },
+    unknown
+  >({
+    mutationFn: async (body) => {
+      const response = await axios.post(
+        "http://192.168.18.20:3000/auth/login",
+        body,
+      );
+
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log("on success data", data);
+      // Invalidate and refetch
+      // queryClient.invalidateQueries({ queryKey: ["todos"] });
+      signIn(data.data.token, data.data.userId);
+
+      Toast.show({
+        type: "success",
+        text1: data.message,
+        text2: "Bienvenido 👋",
+      });
+
+      router.replace("/");
+    },
+  });
 
   const onSubmit = (data: FormData) => {
     if (!isValid) return;
     //hide keyboard
     Keyboard.dismiss();
     console.log("Form data", data);
-    signIn();
-    showToast();
-    //TODO: agregar snack notificación de inicio de sesión
-    // Navigate after signing in. You may want to tweak this to ensure sign-in is
-    // successful before navigating.
-    router.replace("/");
+    mutation.mutate({
+      password: getValues("password"),
+      email: getValues("email"),
+    });
   };
 
   return (
@@ -109,8 +149,10 @@ export default function SignIn() {
         <Button
           label="INICIAR SESIÓN"
           labelColor={Colors.primary}
+          indicatorColor={Colors.primary}
           style={styles.formButton}
           onPress={handleSubmit(onSubmit)}
+          isLoading={mutation.isPending}
         />
       </View>
       <View style={{ height: 10 }} />
