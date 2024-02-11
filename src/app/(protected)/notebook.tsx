@@ -77,6 +77,7 @@ const NoteBookScreen = () => {
       <ViewThemed style={styles.mainView}>
         <Stack.Screen
           options={{
+            animation: "slide_from_right",
             headerTitle: () => (
               <HeaderTitle name="Gastos Diarios" type="Libreta" />
             ),

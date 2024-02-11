@@ -42,6 +42,7 @@ const FolderScreen = () => {
       <ViewThemed style={styles.mainView}>
         <Stack.Screen
           options={{
+            animation: "slide_from_right",
             headerTitle: () => (
               <HeaderTitle name="Mis Finanzas" type="Carpeta" />
             ),

@@ -23,13 +23,15 @@ const UserMenuScreen = () => {
           title: "Menú",
           headerTitleAlign: "left",
           animationTypeForReplace: "push",
+          animation: "slide_from_bottom",
+          animationDuration: 50,
           headerLeft: () => <View style={{ width: 2 }} />,
           headerRight: () => (
             <Text
               onPress={() => router.back()}
               style={{
                 color: "white",
-                fontSize: 18,
+                fontSize: 16,
                 marginRight: 10,
               }}
             >
