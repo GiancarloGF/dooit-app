@@ -10,6 +10,11 @@ import { Slot, SplashScreen } from "expo-router";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Toast, {
+  ErrorToast,
+  SuccessToast,
+  ToastProps,
+} from "react-native-toast-message";
 
 import { SessionProvider } from "@/providers/session_provider";
 
@@ -52,6 +57,31 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+const toastConfig = {
+  success: (props: ToastProps) => (
+    <SuccessToast
+      {...props}
+      text1Style={{
+        fontSize: 20,
+      }}
+      text2Style={{
+        fontSize: 16,
+      }}
+    />
+  ),
+  error: (props: ToastProps) => (
+    <ErrorToast
+      {...props}
+      text1Style={{
+        fontSize: 20,
+      }}
+      text2Style={{
+        fontSize: 16,
+      }}
+    />
+  ),
+};
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
@@ -61,6 +91,7 @@ function RootLayoutNav() {
         <BottomSheetModalProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Slot />
+            <Toast config={toastConfig} />
             {/* <Stack>
         <Stack.Screen name="login" />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

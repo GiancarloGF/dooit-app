@@ -3,6 +3,7 @@ import { Link, router } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Keyboard, StyleSheet, Text, View } from "react-native";
+import Toast from "react-native-toast-message";
 import * as yup from "yup";
 
 import Button from "@/components/Button";
@@ -49,15 +50,25 @@ export default function SignIn() {
 
   const watchRepeatedPassword = watch("repeatedPassword");
 
+  const showToast = () => {
+    Toast.show({
+      type: "success",
+      text1: "¡Ingreso exitoso!",
+      text2: "Bienvenido 👋",
+    });
+  };
+
   const onSubmit = (data: FormData) => {
     if (!isValid) return;
     //hide keyboard
     Keyboard.dismiss();
     console.log("Form data", data);
     signIn();
+    showToast();
     //TODO: agregar snack notificación de inicio de sesión
     // Navigate after signing in. You may want to tweak this to ensure sign-in is
     // successful before navigating.
+
     router.replace("/");
   };
 
