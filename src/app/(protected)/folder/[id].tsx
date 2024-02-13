@@ -1,12 +1,15 @@
 import { Feather } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
-import { Stack, useRouter } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import AlertDialog from "@/components/AlertDialog";
 import Button from "@/components/Button";
+import DocumentItem from "@/components/DocumentItem";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import HeaderTitle from "@/components/HeaderTitle";
 import Modal from "@/components/Modal";
@@ -16,15 +19,34 @@ import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
+import { useSession } from "@/providers/session_provider";
+import { GetFolderResDto } from "@/types/get_folder_dto";
 
 const FolderScreen = () => {
+  const { id: folderId } = useLocalSearchParams();
+  const { token, userId } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
 
-  function onItemPressed() {
-    router.push("/notebook");
-  }
+  const { data: folderResponse } = useQuery<GetFolderResDto>({
+    queryKey: ["folder", folderId],
+    queryFn: async () => {
+      const url = `http://192.168.18.20:3000/folders/folder/${folderId}?userId=${userId}`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("folder response: ", response.data);
+
+      return response.data;
+    },
+  });
+
+  const folder = folderResponse?.data;
+  // const notebooks = notebooksResponse?.data ?? [];
 
   function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
@@ -44,7 +66,7 @@ const FolderScreen = () => {
           options={{
             animation: "slide_from_right",
             headerTitle: () => (
-              <HeaderTitle name="Mis Finanzas" type="Carpeta" />
+              <HeaderTitle name={folder?.name ?? "Folder"} type="Carpeta" />
             ),
             headerRight: () => (
               <TouchableHighlight
@@ -59,34 +81,15 @@ const FolderScreen = () => {
         />
         <SectionHeader name="Libretas" />
         <View style={styles.listItemsContainer}>
-          <Pressable onPress={onItemPressed}>
-            <View
-              style={[styles.itemContainer, { backgroundColor: "#D9FFDA" }]}
-            >
-              <Feather name="folder" size={24} color={Colors.primary} />
-              <View style={styles.itemRight}>
-                <Text style={styles.itemName}>Finanzas</Text>
-                <View style={styles.itemSummary}>
-                  <Text style={styles.itemSummaryText}>4 Libretas</Text>
-                  <Text style={styles.itemSummaryText}>15 Notas</Text>
-                </View>
-              </View>
-            </View>
-          </Pressable>
-          <Pressable onPress={onItemPressed}>
-            <View
-              style={[styles.itemContainer, { backgroundColor: "#D9FFDA" }]}
-            >
-              <Feather name="folder" size={24} color={Colors.primary} />
-              <View style={styles.itemRight}>
-                <Text style={styles.itemName}>Personal</Text>
-                <View style={styles.itemSummary}>
-                  <Text style={styles.itemSummaryText}>4 Libretas</Text>
-                  <Text style={styles.itemSummaryText}>15 Notas</Text>
-                </View>
-              </View>
-            </View>
-          </Pressable>
+          {folder?.notebooks?.map((notebook) => (
+            <DocumentItem
+              key={notebook._id}
+              title={notebook.name}
+              description={`${notebook.notes.length} Notas`}
+              iconName="file"
+              onSelected={() => router.push(`/notebook/${notebook._id}`)}
+            />
+          ))}
         </View>
         <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>

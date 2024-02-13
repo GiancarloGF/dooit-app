@@ -1,6 +1,8 @@
 import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
-import { Stack } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
@@ -17,6 +19,8 @@ import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
+import { useSession } from "@/providers/session_provider";
+import { GetNotebookDto } from "@/types/get_notebook_dto";
 
 const DATA = [
   {
@@ -37,9 +41,27 @@ const DATA = [
 ];
 
 const NoteBookScreen = () => {
+  const { id: notebookId } = useLocalSearchParams();
+  const { token, userId } = useSession();
   const [notes, setNotes] = React.useState(DATA);
   const [isOpen, setIsOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const { data: notebookResponse } = useQuery<GetNotebookDto>({
+    queryKey: ["notebook", notebookId],
+    queryFn: async () => {
+      const url = `http://192.168.18.20:3000/notebooks/notebook/${notebookId}?userId=${userId}`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    },
+  });
+
+  const notebook = notebookResponse?.data;
 
   function onCompleteNote(noteId: string): void {
     // TODO: Implementar creación de carpetas
@@ -79,7 +101,7 @@ const NoteBookScreen = () => {
           options={{
             animation: "slide_from_right",
             headerTitle: () => (
-              <HeaderTitle name="Gastos Diarios" type="Libreta" />
+              <HeaderTitle name={notebook?.name ?? "Libreta"} type="Libreta" />
             ),
             headerRight: () => (
               <TouchableHighlight
@@ -107,11 +129,6 @@ const NoteBookScreen = () => {
             />
           )}
         />
-        {/* <Text>NoteBookScreen</Text>
-        <View style={styles.listItemsContainer}>
-          <DocumentItem />
-          <DocumentItem />
-        </View> */}
         <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>
       {isOpen ? (

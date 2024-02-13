@@ -2,7 +2,7 @@ import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Link, Stack } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Pressable, StatusBar, StyleSheet, View } from "react-native";
 
@@ -22,8 +22,9 @@ import { GetUserResDto } from "@/types/get_user_dto";
 const HomeScreen = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { userId, token } = useSession();
+  const router = useRouter();
 
-  const { data } = useQuery<GetUserResDto>({
+  const { data: userDataResponse } = useQuery<GetUserResDto>({
     queryKey: ["user", userId],
     queryFn: async () => {
       const url = `http://192.168.18.20:3000/users/${userId}`;
@@ -37,14 +38,14 @@ const HomeScreen = () => {
     },
   });
 
+  const userData = userDataResponse?.data;
+
   function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
     console.log("Crear carpeta");
     // bottomSheetRef.current?.present();
     setIsOpen(true);
   }
-
-  const userData = data?.data;
 
   return (
     <>
@@ -70,8 +71,17 @@ const HomeScreen = () => {
         </Text>
         <SectionHeader name="Carpetas" />
         <View style={styles.listItemsContainer}>
-          <DocumentItem />
-          <DocumentItem />
+          {userData?.folders?.map((folder) => (
+            <DocumentItem
+              key={folder._id}
+              title={folder.name}
+              description={`${folder.notebooks.length} Libretas`}
+              iconName="folder"
+              onSelected={() => router.push(`/folder/${folder._id}`)}
+            />
+          ))}
+          {/* <DocumentItem />
+          <DocumentItem /> */}
         </View>
         <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>

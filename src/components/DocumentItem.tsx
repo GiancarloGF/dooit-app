@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -7,28 +6,28 @@ import { Text } from "./Text";
 
 import Colors from "@/constants/Colors";
 
-const DocumentItem = () => {
-  const router = useRouter();
-
-  function onItemPressed() {
-    router.push("/folder");
-  }
-
-  return (
-    <Pressable onPress={onItemPressed}>
-      <View style={[styles.itemContainer, { backgroundColor: "#D9FFDA" }]}>
-        <Feather name="folder" size={24} color={Colors.primary} />
-        <View style={styles.itemRight}>
-          <Text style={styles.itemName}>Finanzas</Text>
-          <View style={styles.itemSummary}>
-            <Text style={styles.itemSummaryText}>4 Libretas</Text>
-            <Text style={styles.itemSummaryText}>15 Notas</Text>
-          </View>
-        </View>
-      </View>
-    </Pressable>
-  );
+type Props = {
+  title: string;
+  description: string;
+  iconName: React.ComponentProps<typeof Feather>["name"];
+  onSelected?: () => void;
 };
+const DocumentItem: React.FC<Props> = ({
+  title,
+  description,
+  iconName,
+  onSelected,
+}) => (
+  <Pressable onPress={onSelected}>
+    <View style={[styles.itemContainer, { backgroundColor: "#D9FFDA" }]}>
+      <Feather name={iconName} size={24} color={Colors.primary} />
+      <View style={styles.itemRight}>
+        <Text style={styles.itemName}>{title}</Text>
+        <Text style={styles.itemSummaryText}>{description}</Text>
+      </View>
+    </View>
+  </Pressable>
+);
 
 export default DocumentItem;
 
