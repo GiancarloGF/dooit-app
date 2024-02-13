@@ -1,12 +1,15 @@
 import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { FlatList, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
+import * as yup from "yup";
 
 import AlertDialog from "@/components/AlertDialog";
 import Button from "@/components/Button";
@@ -21,34 +24,17 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
+import { CreateNoteReqDto, CreateNoteResDto } from "@/types/create_note_dto";
 import {
   DeleteNotebookReqDto,
   DeleteNotebookResDto,
 } from "@/types/delete_notebook_dto";
 import { GetNotebookDto } from "@/types/get_notebook_dto";
 
-const DATA = [
-  {
-    id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-    title: "First Note",
-    isCompleted: false,
-  },
-  {
-    id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-    title: "Second Note",
-    isCompleted: false,
-  },
-  {
-    id: "58694a0f-3da1-471f-bd96-145571e29d72",
-    title: "Third Note",
-    isCompleted: true,
-  },
-];
-
 const NoteBookScreen = () => {
   const { id: notebookId } = useLocalSearchParams();
   const { token, userId } = useSession();
-  const [notes, setNotes] = React.useState(DATA);
+  // const [notes, setNotes] = React.useState(DATA);
   const [isOpen, setIsOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
@@ -117,21 +103,11 @@ const NoteBookScreen = () => {
   function onCompleteNote(noteId: string): void {
     // TODO: Implementar creación de carpetas
     console.log("Completar nota" + noteId);
-    const newNotes = notes.map((note) => {
-      if (note.id === noteId) {
-        return { ...note, isCompleted: !note.isCompleted };
-      }
-      return note;
-    });
-
-    setNotes(newNotes);
   }
 
   function onDeleteNote(noteId: string): void {
     // TODO: Implementar creación de carpetas
     console.log("Eliminar nota" + noteId);
-    const newNotes = notes.filter((note) => note.id !== noteId);
-    setNotes(newNotes);
   }
 
   function onFloatingButtonPressed(): void {
@@ -173,19 +149,38 @@ const NoteBookScreen = () => {
         />
         <SectionHeader name="Notas" />
         <FlatList
-          data={notes}
+          data={notebook?.notes ?? []}
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           style={styles.listContainer}
           renderItem={({ item }) => (
             <NoteItem
               isCompleted={item.isCompleted}
-              title={item.title}
-              onCheckboxPressed={() => onCompleteNote(item.id)}
-              onDeletePressed={() => onDeleteNote(item.id)}
+              title={item.description}
+              onCheckboxPressed={() => onCompleteNote(item._id)}
+              onDeletePressed={() => onDeleteNote(item._id)}
             />
           )}
         />
+        {notebook?.notes?.length === 0 && (
+          <View
+            style={{
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: Colors.ternary,
+                paddingBottom: 50,
+              }}
+            >
+              Aun no tienes notas
+            </Text>
+          </View>
+        )}
         <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>
       {isOpen ? (
@@ -256,6 +251,19 @@ const CustomBottomSheet = ({
   );
 };
 
+type FormData = {
+  name: string;
+};
+
+const schema = yup
+  .object({
+    name: yup
+      .string()
+      .required("Este campo es requerido")
+      .min(3, "Longitud mínima 3 caracteres"),
+  })
+  .required();
+
 const BottomSheetContent = ({
   closeBottomSheet,
   hideKeyboard,
@@ -263,17 +271,70 @@ const BottomSheetContent = ({
   closeBottomSheet: () => void;
   hideKeyboard: () => void;
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { id: notebookId } = useLocalSearchParams();
+  const { userId, token } = useSession();
+  const queryClient = useQueryClient();
+  const mutation = useMutation<
+    CreateNoteResDto,
+    Error,
+    CreateNoteReqDto,
+    unknown
+  >({
+    mutationFn: async (body) => {
+      console.log("on mutationFn body", body);
+      const response = await axios.post(
+        "http://192.168.18.20:3000/notes",
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      return response.data;
+    },
+    onSuccess: (data) => {
+      // // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["notebook"] });
+      queryClient.invalidateQueries({ queryKey: ["folder"] });
+      // signIn(data.data.token, data.data.userId);
+      Toast.show({
+        type: "success",
+        text1: data.message,
+        text2: data.data.description,
+      });
+
+      closeBottomSheet();
+    },
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    getValues,
+  } = useForm<FormData>({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: "",
+    },
+  });
   // const { hideKeyboard } = useKeyboard();
 
-  function onCreate() {
-    setIsLoading(true);
+  function onSubmit() {
+    if (!isValid) return;
+
     hideKeyboard();
 
-    setTimeout(() => {
-      setIsLoading(false);
-      closeBottomSheet();
-    }, 1000);
+    mutation.mutate({
+      description: getValues("name"),
+      isCompleted: false,
+      userId: userId!,
+      notebookId: notebookId as string,
+    });
   }
 
   return (
@@ -283,17 +344,34 @@ const BottomSheetContent = ({
         <Text style={styles.sheetHeaderTitle}>Nueva Nota</Text>
       </View>
       <View style={styles.sheetContent}>
-        <TextInput
+        <Controller
+          control={control}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              label="Nombre"
+              labelColor={Colors.primary}
+              selectionColor={Colors.primary}
+              style={{ color: Colors.primary }}
+              errorText={errors.name?.message}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+            />
+          )}
+          name="name"
+        />
+        {/* <TextInput
           label="Nombre"
           errorText={undefined}
           labelColor={Colors.primary}
-        />
+        /> */}
       </View>
       {/* <View style={{ flex: 1 }} /> */}
       <Button
         label="Crear"
-        isLoading={isLoading}
-        onPress={onCreate}
+        isLoading={mutation.isPending}
+        disabled={!isValid}
+        onPress={handleSubmit(onSubmit)}
         labelColor="white"
         style={{ backgroundColor: Colors.primary }}
       />
