@@ -1,11 +1,12 @@
 import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
 
 import AlertDialog from "@/components/AlertDialog";
 import Button from "@/components/Button";
@@ -20,6 +21,10 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
+import {
+  DeleteNotebookReqDto,
+  DeleteNotebookResDto,
+} from "@/types/delete_notebook_dto";
 import { GetNotebookDto } from "@/types/get_notebook_dto";
 
 const DATA = [
@@ -46,6 +51,8 @@ const NoteBookScreen = () => {
   const [notes, setNotes] = React.useState(DATA);
   const [isOpen, setIsOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data: notebookResponse } = useQuery<GetNotebookDto>({
     queryKey: ["notebook", notebookId],
@@ -58,6 +65,50 @@ const NoteBookScreen = () => {
       });
 
       return response.data;
+    },
+  });
+
+  const mutation = useMutation<
+    DeleteNotebookResDto,
+    Error,
+    DeleteNotebookReqDto,
+    unknown
+  >({
+    mutationFn: async () => {
+      // const { userId } = body;
+      // console.log("Id de usuario", userId);
+
+      const url = `http://192.168.18.20:3000/notebooks/${notebookId}`;
+      const response = await axios.delete(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    },
+    onError: (error) => {
+      console.log("on error", error);
+      Toast.show({
+        type: "error",
+        text1: error.message,
+      });
+      setModalVisible(false);
+    },
+    onSuccess: (data) => {
+      console.log("on success data", data);
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["folder"] });
+
+      Toast.show({
+        type: "success",
+        text1: data.message,
+        text2: data.data.name,
+      });
+
+      setModalVisible(false);
+      router.back();
     },
   });
 
@@ -90,8 +141,14 @@ const NoteBookScreen = () => {
     setIsOpen(true);
   }
 
-  function onDelete(): void {
+  function onDeleteButtonPressed(): void {
     setModalVisible(true);
+  }
+
+  function deleteNotebook(): void {
+    mutation.mutate({
+      userId: userId!,
+    });
   }
 
   return (
@@ -105,7 +162,7 @@ const NoteBookScreen = () => {
             ),
             headerRight: () => (
               <TouchableHighlight
-                onPress={onDelete}
+                onPress={onDeleteButtonPressed}
                 style={styles.deleteButton}
                 underlayColor="#CBD5E1"
               >
@@ -136,7 +193,7 @@ const NoteBookScreen = () => {
       ) : null}
       <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
         <AlertDialog
-          onConfirm={() => setModalVisible(false)}
+          onConfirm={deleteNotebook}
           onDismiss={() => setModalVisible(false)}
           title="¿Deseas eliminar esta libreta?"
           description="Esta acción no se puede deshacer"

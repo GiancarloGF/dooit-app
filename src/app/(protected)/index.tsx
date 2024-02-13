@@ -235,6 +235,9 @@ const BottomSheetContent = ({
 
   function onSubmit() {
     // setIsLoading(true);
+
+    if (!isValid) return;
+
     hideKeyboard();
 
     mutation.mutate({

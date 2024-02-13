@@ -1,12 +1,15 @@
 import { Feather } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
+import * as yup from "yup";
 
 import AlertDialog from "@/components/AlertDialog";
 import Button from "@/components/Button";
@@ -21,6 +24,10 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
+import {
+  CreateNotebookReqDto,
+  CreateNotebookResDto,
+} from "@/types/create_notebook_dto";
 import {
   DeleteFolderReqDto,
   DeleteFolderResDto,
@@ -252,6 +259,19 @@ const CustomBottomSheet = ({
   );
 };
 
+type FormData = {
+  name: string;
+};
+
+const schema = yup
+  .object({
+    name: yup
+      .string()
+      .required("Este campo es requerido")
+      .min(3, "Longitud mínima 3 caracteres"),
+  })
+  .required();
+
 const BottomSheetContent = ({
   closeBottomSheet,
   hideKeyboard,
@@ -259,17 +279,68 @@ const BottomSheetContent = ({
   closeBottomSheet: () => void;
   hideKeyboard: () => void;
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { userId, token } = useSession();
+  const queryClient = useQueryClient();
+  const { id: folderId } = useLocalSearchParams();
   // const { hideKeyboard } = useKeyboard();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    getValues,
+  } = useForm<FormData>({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: "",
+    },
+  });
 
-  function onCreate() {
-    setIsLoading(true);
+  const mutation = useMutation<
+    CreateNotebookResDto,
+    Error,
+    CreateNotebookReqDto,
+    unknown
+  >({
+    mutationFn: async (body) => {
+      console.log("on mutationFn body", body);
+      const response = await axios.post(
+        "http://192.168.18.20:3000/notebooks",
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      return response.data;
+    },
+    onSuccess: (data) => {
+      // // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["folder"] });
+      // signIn(data.data.token, data.data.userId);
+      Toast.show({
+        type: "success",
+        text1: data.message,
+        text2: data.data.name,
+      });
+
+      closeBottomSheet();
+    },
+  });
+
+  function onSubmit() {
+    if (!isValid) return;
+
     hideKeyboard();
 
-    setTimeout(() => {
-      setIsLoading(false);
-      closeBottomSheet();
-    }, 1000);
+    mutation.mutate({
+      name: getValues("name"),
+      isFeatured: false,
+      userId: userId!,
+      folderId: folderId as string,
+    });
   }
 
   return (
@@ -279,17 +350,34 @@ const BottomSheetContent = ({
         <Text style={styles.sheetHeaderTitle}>Nueva Libreta</Text>
       </View>
       <View style={styles.sheetContent}>
-        <TextInput
+        <Controller
+          control={control}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              label="Nombre"
+              labelColor={Colors.primary}
+              selectionColor={Colors.primary}
+              style={{ color: Colors.primary }}
+              errorText={errors.name?.message}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+            />
+          )}
+          name="name"
+        />
+        {/* <TextInput
           label="Nombre"
           errorText={undefined}
           labelColor={Colors.primary}
-        />
+        /> */}
       </View>
       {/* <View style={{ flex: 1 }} /> */}
       <Button
         label="Crear"
-        isLoading={isLoading}
-        onPress={onCreate}
+        isLoading={mutation.isPending}
+        disabled={!isValid}
+        onPress={handleSubmit(onSubmit)}
         style={{ backgroundColor: Colors.primary }}
         labelColor="white"
       />
