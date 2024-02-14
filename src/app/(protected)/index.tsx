@@ -90,6 +90,25 @@ const HomeScreen = () => {
             />
           ))}
         </View>
+        {userData?.folders?.length === 0 && (
+          <View
+            style={{
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: Colors.ternary,
+                paddingBottom: 50,
+              }}
+            >
+              Aun no tienes carpetas
+            </Text>
+          </View>
+        )}
         <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>
       {isOpen ? (
