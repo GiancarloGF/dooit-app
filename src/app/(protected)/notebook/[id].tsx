@@ -100,16 +100,6 @@ const NoteBookScreen = () => {
 
   const notebook = notebookResponse?.data;
 
-  function onCompleteNote(noteId: string): void {
-    // TODO: Implementar creación de carpetas
-    console.log("Completar nota" + noteId);
-  }
-
-  function onDeleteNote(noteId: string): void {
-    // TODO: Implementar creación de carpetas
-    console.log("Eliminar nota" + noteId);
-  }
-
   function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
     console.log("Crear carpeta");
@@ -153,14 +143,7 @@ const NoteBookScreen = () => {
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item._id}
           style={styles.listContainer}
-          renderItem={({ item }) => (
-            <NoteItem
-              isCompleted={item.isCompleted}
-              title={item.description}
-              onCheckboxPressed={() => onCompleteNote(item._id)}
-              onDeletePressed={() => onDeleteNote(item._id)}
-            />
-          )}
+          renderItem={({ item }) => <NoteItem note={item} />}
         />
         {notebook?.notes?.length === 0 && (
           <View
