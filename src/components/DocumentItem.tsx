@@ -11,15 +11,17 @@ type Props = {
   description: string;
   iconName: React.ComponentProps<typeof Feather>["name"];
   onSelected?: () => void;
+  color: string;
 };
 const DocumentItem: React.FC<Props> = ({
   title,
   description,
   iconName,
   onSelected,
+  color,
 }) => (
   <Pressable onPress={onSelected}>
-    <View style={[styles.itemContainer, { backgroundColor: "#D9FFDA" }]}>
+    <View style={[styles.itemContainer, { backgroundColor: color }]}>
       <Feather name={iconName} size={24} color={Colors.primary} />
       <View style={styles.itemRight}>
         <Text style={styles.itemName}>{title}</Text>

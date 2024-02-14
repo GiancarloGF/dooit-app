@@ -85,27 +85,13 @@ const HomeScreen = () => {
               title={folder.name}
               description={`${folder.notebooks.length} Libretas`}
               iconName="folder"
+              color={folder.color}
               onSelected={() => router.push(`/folder/${folder._id}`)}
             />
           ))}
-          {/* <DocumentItem />
-          <DocumentItem /> */}
         </View>
         <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>
-      {/* <BottomSheetModal
-        // ref={bottomSheetRef}
-        index={0}
-        snapPoints={snapPointsValues}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-        keyboardBehavior="extend"
-      >
-        <BottomSheetContent
-          closeBottomSheet={() => bottomSheetRef.current?.dismiss()}
-          hideKeyboard={hideKeyboard}
-        />
-      </BottomSheetModal> */}
       {isOpen ? (
         <CustomBottomSheet onCloseBottomSheet={() => setIsOpen(false)} />
       ) : null}
@@ -124,9 +110,9 @@ const CustomBottomSheet = ({
   const { keyboardShown, hideKeyboard } = useKeyboard();
   const snapPointsValues = useMemo(() => {
     if (keyboardShown) {
-      return ["65%"];
+      return ["85%"];
     } else {
-      return ["35%"];
+      return ["50%"];
     }
   }, [keyboardShown]);
   const renderBackdrop = useCallback(
@@ -177,6 +163,15 @@ const schema = yup
   })
   .required();
 
+const colors = [
+  "#FFEFD7",
+  "#E4FDFF",
+  "#D9FFDA",
+  "#EED8FF",
+  "#FFD8D8",
+  "#D9D9D9",
+];
+
 const BottomSheetContent = ({
   closeBottomSheet,
   hideKeyboard,
@@ -185,6 +180,7 @@ const BottomSheetContent = ({
   hideKeyboard: () => void;
 }) => {
   // const { hideKeyboard } = useKeyboard();
+  const [colorSelected, setColorSelected] = useState<string>(colors[0]);
   const { userId, token } = useSession();
   const queryClient = useQueryClient();
 
@@ -245,7 +241,7 @@ const BottomSheetContent = ({
       isFeatured: false,
       userId: userId!,
       label: "",
-      color: "#fff",
+      color: colorSelected,
     });
   }
 
@@ -272,11 +268,25 @@ const BottomSheetContent = ({
           )}
           name="name"
         />
-        {/* <TextInput
-          label="Nombre"
-          errorText={undefined}
-          labelColor={Colors.primary}
-        /> */}
+        <View style={styles.colorsSection}>
+          <Text style={styles.colorsText}>Color</Text>
+          <View style={styles.colorsContainer}>
+            {colors.map((color) => (
+              <Pressable
+                key={color}
+                onPress={() => setColorSelected(color)}
+                style={[
+                  styles.colorItem,
+                  {
+                    backgroundColor: color,
+                    borderWidth: colorSelected === color ? 2 : 0,
+                    borderColor: Colors.primary,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+        </View>
       </View>
       {/* <View style={{ flex: 1 }} /> */}
       <Button
@@ -284,7 +294,7 @@ const BottomSheetContent = ({
         isLoading={mutation.isPending}
         disabled={!isValid}
         onPress={handleSubmit(onSubmit)}
-        style={{ backgroundColor: Colors.primary }}
+        style={{ backgroundColor: !isValid ? "gray" : Colors.primary }}
         labelColor="white"
       />
     </View>
@@ -365,5 +375,23 @@ const styles = StyleSheet.create({
   userAvatarInitials: {
     color: Colors.primary,
     fontFamily: "ComfortaaBold",
+  },
+
+  colorsSection: {
+    marginTop: 15,
+  },
+  colorsText: {
+    color: Colors.primary,
+    marginBottom: 5,
+  },
+  colorsContainer: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 10,
+  },
+  colorItem: {
+    width: 40,
+    height: 40,
+    borderRadius: 100,
   },
 });

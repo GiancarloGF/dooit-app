@@ -147,6 +147,7 @@ const FolderScreen = () => {
               title={notebook.name}
               description={`${notebook.notes.length} Notas`}
               iconName="file"
+              color={folder.color}
               onSelected={() => router.push(`/notebook/${notebook._id}`)}
             />
           ))}
