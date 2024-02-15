@@ -1,6 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { Stack, useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
@@ -8,6 +7,7 @@ import { StyleSheet, TouchableHighlight, View } from "react-native";
 import Avatar from "@/components/Avatar";
 import { Text } from "@/components/Text";
 import { ViewThemed } from "@/components/ViewThemed";
+import axios from "@/config/axios";
 import Colors from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useSession } from "@/providers/session_provider";
@@ -20,7 +20,7 @@ const UserMenuScreen = () => {
   const { data } = useQuery<GetUserResDto>({
     queryKey: ["user", userId],
     queryFn: async () => {
-      const url = `http://192.168.18.20:3000/users/${userId}`;
+      const url = `/users/${userId}`;
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,

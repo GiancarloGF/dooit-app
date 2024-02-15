@@ -2,7 +2,6 @@ import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { Link, Stack, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -18,6 +17,7 @@ import SectionHeader from "@/components/SectionHeader";
 import { Text } from "@/components/Text";
 import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
+import axios from "@/config/axios";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
@@ -35,7 +35,7 @@ const HomeScreen = () => {
   const { data: userDataResponse } = useQuery<GetUserResDto>({
     queryKey: ["user", userId],
     queryFn: async () => {
-      const url = `http://192.168.18.20:3000/users/${userId}`;
+      const url = `/users/${userId}`;
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -223,15 +223,11 @@ const BottomSheetContent = ({
   >({
     mutationFn: async (body) => {
       console.log("on mutationFn body", body);
-      const response = await axios.post(
-        "http://192.168.18.20:3000/folders",
-        body,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.post("/folders", body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       return response.data;
     },

@@ -2,7 +2,6 @@ import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -21,6 +20,7 @@ import SectionHeader from "@/components/SectionHeader";
 import { Text } from "@/components/Text";
 import TextInput from "@/components/TextInput";
 import { ViewThemed } from "@/components/ViewThemed";
+import axios from "@/config/axios";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
@@ -43,7 +43,7 @@ const NoteBookScreen = () => {
   const { data: notebookResponse } = useQuery<GetNotebookDto>({
     queryKey: ["notebook", notebookId],
     queryFn: async () => {
-      const url = `http://192.168.18.20:3000/notebooks/notebook/${notebookId}?userId=${userId}`;
+      const url = `/notebooks/notebook/${notebookId}?userId=${userId}`;
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ const NoteBookScreen = () => {
       // const { userId } = body;
       // console.log("Id de usuario", userId);
 
-      const url = `http://192.168.18.20:3000/notebooks/${notebookId}`;
+      const url = `/notebooks/${notebookId}`;
       const response = await axios.delete(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -266,15 +266,11 @@ const BottomSheetContent = ({
   >({
     mutationFn: async (body) => {
       console.log("on mutationFn body", body);
-      const response = await axios.post(
-        "http://192.168.18.20:3000/notes",
-        body,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.post("/notes", body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       return response.data;
     },

@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { Link, router } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -19,6 +18,7 @@ import * as yup from "yup";
 import Button from "@/components/Button";
 import Logo from "@/components/Logo";
 import TextInput from "@/components/TextInput";
+import axios from "@/config/axios";
 import Colors from "@/constants/Colors";
 import { useSession } from "@/providers/session_provider";
 
@@ -78,10 +78,7 @@ export default function SignUpScreen() {
   >({
     mutationFn: async (body) => {
       console.log("body", body);
-      const response = await axios.post(
-        "http://192.168.18.20:3000/auth/register",
-        body,
-      );
+      const response = await axios.post("/auth/register", body);
 
       return response.data;
     },

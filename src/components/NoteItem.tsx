@@ -1,6 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -8,6 +7,7 @@ import Toast from "react-native-toast-message";
 import Checkbox from "./Checkbox";
 import { Text } from "./Text";
 
+import axios from "@/config/axios";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useSession } from "@/providers/session_provider";
 import { DeleteNoteReqDto, DeleteNoteResDto } from "@/types/delete_note_dto";
@@ -30,15 +30,11 @@ const NoteItem: React.FC<Props> = ({ note }) => {
     unknown
   >({
     mutationFn: async (body) => {
-      const response = await axios.patch(
-        `http://192.168.18.20:3000/notes/${_id}`,
-        body,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.patch(`/notes/${_id}`, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
       return response.data;
     },
     onError: (error) => {
@@ -62,14 +58,11 @@ const NoteItem: React.FC<Props> = ({ note }) => {
     unknown
   >({
     mutationFn: async () => {
-      const response = await axios.delete(
-        `http://192.168.18.20:3000/notes/${_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.delete(`/notes/${_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
       return response.data;
     },
     onError: (error) => {

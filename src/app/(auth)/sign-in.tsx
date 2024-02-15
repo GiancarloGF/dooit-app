@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { Link, router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Keyboard, StyleSheet, Text, View } from "react-native";
@@ -10,18 +9,12 @@ import * as yup from "yup";
 import Button from "@/components/Button";
 import Logo from "@/components/Logo";
 import TextInput from "@/components/TextInput";
+import axios from "@/config/axios";
 import Colors from "@/constants/Colors";
 import { useSession } from "@/providers/session_provider";
 
 const REQUIRED_ERROR_MSG = "Este campo es requerido";
 const EMAIL_ERROR_MSG = "Debe ser un correo electrónico válido";
-
-// function loginFn(email: string, password: string) {
-//   return axios.post("http://localhost:3000/auth/login", {
-//     email: email,
-//     password: password,
-//   });
-// }
 
 type SignInResponse = {
   message: string;
@@ -67,10 +60,7 @@ export default function SignInScreen() {
     unknown
   >({
     mutationFn: async (body) => {
-      const response = await axios.post(
-        "http://192.168.18.20:3000/auth/login",
-        body,
-      );
+      const response = await axios.post("/auth/login", body);
 
       return response.data;
     },
