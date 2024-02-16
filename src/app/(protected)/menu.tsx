@@ -61,7 +61,7 @@ const UserMenuScreen = () => {
         }}
       />
       <View style={styles.userInfoContainer}>
-        <Avatar negative size={60} />
+        <Avatar negative size={60} initialsFrom={userData?.username} />
         <View style={styles.userAccessData}>
           <Text style={styles.userName}>{userData?.username ?? ""}</Text>
           <Text style={styles.userEmail}>{userData?.email ?? ""}</Text>

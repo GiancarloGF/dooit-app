@@ -1,6 +1,7 @@
 import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { Link, Stack, useRouter } from "expo-router";
+import { Skeleton } from "moti/skeleton";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Pressable, StatusBar, View } from "react-native";
@@ -13,6 +14,7 @@ import useUserQuery from "./useUserQuery";
 import Avatar from "@/components/Avatar";
 import Button from "@/components/Button";
 import DocumentItem from "@/components/DocumentItem";
+import DocumentItemsSkeleton from "@/components/DocumentItemSkeleton";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import SectionHeader from "@/components/SectionHeader";
 import { Text } from "@/components/Text";
@@ -21,13 +23,12 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
-import DocumentItemSkeleton from "@/components/DocumentItemSkeleton";
 
 const HomeScreen = () => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  const { user } = useUserQuery();
+  const { user, isLoading } = useUserQuery();
 
   function onFloatingButtonPressed(): void {
     // TODO: Implementar creación de carpetas
@@ -44,14 +45,26 @@ const HomeScreen = () => {
           options={{
             title: "Dooit App",
             headerRight: () => (
-              <Link href="/menu" asChild>
-                <Pressable>
-                  <Avatar
-                    containerStyle={{ backgroundColor: "white" }}
-                    textStyle={{ color: Colors.primary }}
+              <>
+                {user ? (
+                  <Link href="/menu" asChild>
+                    <Pressable>
+                      <Avatar
+                        initialsFrom={user.username}
+                        containerStyle={{ backgroundColor: "white" }}
+                        textStyle={{ color: Colors.primary }}
+                      />
+                    </Pressable>
+                  </Link>
+                ) : (
+                  <Skeleton
+                    colorMode="light"
+                    height={40}
+                    width={40}
+                    radius={100}
                   />
-                </Pressable>
-              </Link>
+                )}
+              </>
             ),
           }}
         />
@@ -59,7 +72,7 @@ const HomeScreen = () => {
           👋 Hola{user ? `, ${user.username}` : ""}!
         </Text>
         <SectionHeader name="Carpetas" />
-        <DocumentItemSkeleton />
+        <DocumentItemsSkeleton show={isLoading} />
         <View style={styles.listItemsContainer}>
           {user?.folders?.map((folder) => (
             <DocumentItem

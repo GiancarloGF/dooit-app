@@ -8,12 +8,14 @@ type Props = {
   size?: number;
   containerStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  initialsFrom?: string;
 };
 const Avatar: React.FC<Props> = ({
   negative = false,
-  size = 45,
+  size = 40,
   containerStyle = {},
   textStyle = {},
+  initialsFrom,
 }) => {
   const backgroundColor = useThemeColor(
     undefined,
@@ -27,7 +29,6 @@ const Avatar: React.FC<Props> = ({
           width: size,
           height: size,
           borderRadius: 100,
-          // padding: 10,
           backgroundColor,
           display: "flex",
           justifyContent: "center",
@@ -41,11 +42,12 @@ const Avatar: React.FC<Props> = ({
           {
             color,
             fontFamily: "ComfortaaBold",
+            fontSize: size * 0.4,
           },
           textStyle,
         ]}
       >
-        GG
+        {initialsFrom?.slice(0, 1).toUpperCase()}
       </Text>
     </View>
   );

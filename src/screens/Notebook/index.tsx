@@ -14,6 +14,7 @@ import useGetNotebook from "./useGetNotebook";
 
 import AlertDialog from "@/components/AlertDialog";
 import Button from "@/components/Button";
+import DocumentItemsSkeleton from "@/components/DocumentItemSkeleton";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import HeaderTitle from "@/components/HeaderTitle";
 import Modal from "@/components/Modal";
@@ -32,7 +33,7 @@ const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const { notebook } = useGetNotebook({
+  const { notebook, isLoading } = useGetNotebook({
     notebookId,
   });
 
@@ -81,6 +82,7 @@ const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
           }}
         />
         <SectionHeader name="Notas" />
+        <DocumentItemsSkeleton show={isLoading} />
         <FlatList
           data={notebook?.notes ?? []}
           showsVerticalScrollIndicator={false}

@@ -15,6 +15,7 @@ import useGetFolder from "./useGetFolder";
 import AlertDialog from "@/components/AlertDialog";
 import Button from "@/components/Button";
 import DocumentItem from "@/components/DocumentItem";
+import DocumentItemsSkeleton from "@/components/DocumentItemSkeleton";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import HeaderTitle from "@/components/HeaderTitle";
 import Modal from "@/components/Modal";
@@ -32,7 +33,7 @@ const FolderScreen = ({ folderId }: { folderId: string }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
 
-  const { folder } = useGetFolder(folderId);
+  const { folder, isLoading } = useGetFolder(folderId);
 
   const mutation = useDeleteFolder({
     folderId,
@@ -77,6 +78,7 @@ const FolderScreen = ({ folderId }: { folderId: string }) => {
           }}
         />
         <SectionHeader name="Libretas" />
+        <DocumentItemsSkeleton show={isLoading} />
         <View style={styles.listItemsContainer}>
           {folder?.notebooks?.map((notebook) => (
             <DocumentItem
