@@ -9,7 +9,7 @@ import * as yup from "yup";
 import Button from "@/components/Button";
 import Logo from "@/components/Logo";
 import TextInput from "@/components/TextInput";
-import axios from "@/config/axios";
+import axiosInstance from "@/config/axios";
 import Colors from "@/constants/Colors";
 import { useSession } from "@/providers/session_provider";
 
@@ -60,9 +60,17 @@ export default function SignInScreen() {
     unknown
   >({
     mutationFn: async (body) => {
-      const response = await axios.post("/auth/login", body);
+      const response = await axiosInstance.post("/auth/login", body);
 
       return response.data;
+    },
+    onError: (error) => {
+      console.log("on error", error);
+
+      Toast.show({
+        type: "error",
+        text1: error.message,
+      });
     },
     onSuccess: (data) => {
       console.log("on success data", data);

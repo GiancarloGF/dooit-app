@@ -1,0 +1,20 @@
+{
+    "build": {
+        "development": {
+            "developmentClient": true,
+            "env": {
+                "EXPO_PUBLIC_APP_VARIANT": "development",
+                "EXPO_PUBLIC_API_BASE_URL": "http://192.168.18.228:3000"
+            }
+        },
+        "production": {
+            "env": {
+                "EXPO_PUBLIC_APP_VARIANT": "production",
+                "EXPO_PUBLIC_API_BASE_URL": "https://dooit-app-back.onrender.com"
+            },
+            "android": {
+                "buildType": "apk"
+            }
+        }
+    }
+}
