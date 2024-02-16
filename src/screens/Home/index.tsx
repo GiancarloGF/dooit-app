@@ -21,6 +21,7 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
+import DocumentItemSkeleton from "@/components/DocumentItemSkeleton";
 
 const HomeScreen = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +59,7 @@ const HomeScreen = () => {
           👋 Hola{user ? `, ${user.username}` : ""}!
         </Text>
         <SectionHeader name="Carpetas" />
+        <DocumentItemSkeleton />
         <View style={styles.listItemsContainer}>
           {user?.folders?.map((folder) => (
             <DocumentItem
