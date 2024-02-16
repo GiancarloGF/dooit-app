@@ -1,11 +1,12 @@
 import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
+import styles from "./styles";
 import useCreateNote from "./useCreateNote";
 import useCreateNoteForm from "./useCreateNoteForm";
 import useDeleteNotebook from "./useDeleteNotebook";
@@ -24,6 +25,7 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
+import { Notebook } from "@/types/notebook";
 
 const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
   const { userId } = useSession();
@@ -107,8 +109,11 @@ const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
         )}
         <FloatingActionButton onPress={onFloatingButtonPressed} />
       </ViewThemed>
-      {isOpen ? (
-        <CustomBottomSheet onCloseBottomSheet={() => setIsOpen(false)} />
+      {notebook && isOpen ? (
+        <CustomBottomSheet
+          notebook={notebook}
+          onCloseBottomSheet={() => setIsOpen(false)}
+        />
       ) : null}
       <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
         <AlertDialog
@@ -127,12 +132,38 @@ const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
 export default NoteBookScreen;
 
 const CustomBottomSheet = ({
+  notebook,
   onCloseBottomSheet,
 }: {
+  notebook: Notebook;
   onCloseBottomSheet: () => void;
 }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { keyboardShown, hideKeyboard } = useKeyboard();
+  const { userId } = useSession();
+
+  const mutation = useCreateNote({
+    closeModal: () => {
+      bottomSheetRef.current?.collapse();
+      onCloseBottomSheet();
+    },
+  });
+
+  const form = useCreateNoteForm();
+
+  function onSubmit() {
+    if (!form.isValid) return;
+
+    hideKeyboard();
+
+    mutation.mutate({
+      description: form.getValues("name"),
+      isCompleted: false,
+      userId: userId!,
+      notebookId: notebook._id,
+      folderId: notebook.folder,
+    });
+  }
   const snapPointsValues = useMemo(() => {
     if (keyboardShown) {
       return ["65%"];
@@ -164,146 +195,38 @@ const CustomBottomSheet = ({
         }
       }}
     >
-      <BottomSheetContent
-        closeBottomSheet={() => {
-          bottomSheetRef.current?.collapse();
-          onCloseBottomSheet();
-        }}
-        hideKeyboard={hideKeyboard}
-      />
+      <View style={styles.sheetContainer}>
+        <View style={styles.sheetHeader}>
+          <Feather name="plus-square" size={24} color={Colors.primary} />
+          <Text style={styles.sheetHeaderTitle}>Nueva Nota</Text>
+        </View>
+        <View style={styles.sheetContent}>
+          <Controller
+            control={form.control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Nombre"
+                labelColor={Colors.primary}
+                selectionColor={Colors.primary}
+                style={{ color: Colors.primary }}
+                errorText={form.errors.name?.message}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+            name="name"
+          />
+        </View>
+        <Button
+          label="Crear"
+          isLoading={mutation.isPending}
+          disabled={!form.isValid}
+          onPress={form.handleSubmit(onSubmit)}
+          labelColor="white"
+          style={{ backgroundColor: Colors.primary }}
+        />
+      </View>
     </BottomSheet>
   );
 };
-
-const BottomSheetContent = ({
-  closeBottomSheet,
-  hideKeyboard,
-}: {
-  closeBottomSheet: () => void;
-  hideKeyboard: () => void;
-}) => {
-  const { id: notebookId } = useLocalSearchParams();
-  const { userId } = useSession();
-
-  const mutation = useCreateNote({
-    closeModal: () => {
-      closeBottomSheet();
-    },
-  });
-
-  const form = useCreateNoteForm();
-
-  function onSubmit() {
-    if (!form.isValid) return;
-
-    hideKeyboard();
-
-    mutation.mutate({
-      description: form.getValues("name"),
-      isCompleted: false,
-      userId: userId!,
-      notebookId: notebookId as string,
-    });
-  }
-
-  return (
-    <View style={styles.sheetContainer}>
-      <View style={styles.sheetHeader}>
-        <Feather name="plus-square" size={24} color={Colors.primary} />
-        <Text style={styles.sheetHeaderTitle}>Nueva Nota</Text>
-      </View>
-      <View style={styles.sheetContent}>
-        <Controller
-          control={form.control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Nombre"
-              labelColor={Colors.primary}
-              selectionColor={Colors.primary}
-              style={{ color: Colors.primary }}
-              errorText={form.errors.name?.message}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-          name="name"
-        />
-        {/* <TextInput
-          label="Nombre"
-          errorText={undefined}
-          labelColor={Colors.primary}
-        /> */}
-      </View>
-      {/* <View style={{ flex: 1 }} /> */}
-      <Button
-        label="Crear"
-        isLoading={mutation.isPending}
-        disabled={!form.isValid}
-        onPress={form.handleSubmit(onSubmit)}
-        labelColor="white"
-        style={{ backgroundColor: Colors.primary }}
-      />
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  mainView: {
-    flex: 1,
-    padding: 10,
-  },
-  listItemsContainer: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-  },
-  listContainer: {
-    marginTop: 10,
-    paddingHorizontal: 5,
-  },
-
-  sheetContainer: {
-    flex: 1,
-    display: "flex",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  sheetHeader: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    width: "100%",
-  },
-  sheetHeaderTitle: {
-    fontSize: 20,
-    color: Colors.primary,
-  },
-  sheetContent: {
-    flex: 1,
-    padding: 10,
-  },
-  sheetText: {
-    color: Colors.primary,
-  },
-  input: {
-    marginTop: 8,
-    marginBottom: 10,
-    borderRadius: 10,
-    fontSize: 16,
-    lineHeight: 20,
-    padding: 8,
-    backgroundColor: "rgba(151, 151, 151, 0.25)",
-  },
-  contentContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
-  deleteButton: {
-    padding: 15,
-    borderRadius: 100,
-  },
-});

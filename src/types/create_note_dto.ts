@@ -5,6 +5,7 @@ export interface CreateNoteReqDto {
   isCompleted: boolean;
   userId: string;
   notebookId: string;
+  folderId: string;
 }
 
 export interface CreateNoteResDto {
