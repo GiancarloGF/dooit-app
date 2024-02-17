@@ -5,13 +5,13 @@ export default {
   slug: "dooit-app",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/images/icon.png",
+  icon: "./assets/images/dooit_icon.png",
   scheme: "myapp",
   userInterfaceStyle: "automatic",
   splash: {
-    image: "./assets/images/splash.png",
+    image: "./assets/images/dooit_splash_screen.png",
     resizeMode: "contain",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#0F172A",
   },
   assetBundlePatterns: ["**/*"],
   ios: {
@@ -21,7 +21,7 @@ export default {
   android: {
     package: IS_DEV ? "com.dooitapp.dev" : "com.dooitapp",
     adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
+      foregroundImage: "./assets/images/dooit_icon.png",
       backgroundColor: "#ffffff",
     },
   },
