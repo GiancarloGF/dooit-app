@@ -41,6 +41,7 @@ export default function useCreateFolderMutation({
       Toast.show({
         type: "success",
         text1: data.message,
+        text2: data.data.name,
       });
 
       closeModal?.();

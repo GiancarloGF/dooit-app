@@ -1,6 +1,6 @@
 import Feather from "@expo/vector-icons/Feather";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -18,6 +18,7 @@ type Props = {
   note: Note;
 };
 const NoteItem: React.FC<Props> = ({ note }) => {
+  const [isChecked, setIsChecked] = useState(false);
   const { _id, description, isCompleted } = note;
   const { token } = useSession();
   const queryClient = useQueryClient();
@@ -88,6 +89,8 @@ const NoteItem: React.FC<Props> = ({ note }) => {
   function onCompleteNote() {
     if (updateNote.isPending) return;
 
+    setIsChecked(!isChecked);
+
     updateNote.mutate({
       isCompleted: !isCompleted,
     });
@@ -99,17 +102,21 @@ const NoteItem: React.FC<Props> = ({ note }) => {
     deleteNote.mutate({});
   }
 
+  useEffect(() => {
+    setIsChecked(isCompleted);
+  }, [note]);
+
   return (
     <View style={styles.container}>
       <Pressable onPress={onCompleteNote}>
-        <Checkbox isChecked={isCompleted} />
+        <Checkbox isChecked={isChecked} />
       </Pressable>
       <View style={{ flex: 1 }}>
         <Text
           style={[
             styles.title,
             {
-              textDecorationLine: isCompleted ? "line-through" : "none",
+              textDecorationLine: isChecked ? "line-through" : "none",
             },
           ]}
         >

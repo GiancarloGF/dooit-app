@@ -1,9 +1,15 @@
 import Feather from "@expo/vector-icons/Feather";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { Stack } from "expo-router";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Controller } from "react-hook-form";
-import { FlatList, View } from "react-native";
+import { ActivityIndicator, FlatList, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import styles from "./styles";
@@ -26,12 +32,14 @@ import { ViewThemed } from "@/components/ViewThemed";
 import Colors from "@/constants/Colors";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useSession } from "@/providers/session_provider";
+import { Note } from "@/types/note";
 import { Notebook } from "@/types/notebook";
 
 const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
   const { userId } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [notes, setNotes] = useState<Note[]>([]);
 
   const { notebook, isLoading } = useGetNotebook({
     notebookId,
@@ -61,6 +69,12 @@ const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
     });
   }
 
+  useEffect(() => {
+    if (notebook) {
+      setNotes(notebook.notes);
+    }
+  }, [notebook]);
+
   return (
     <>
       <ViewThemed style={styles.mainView}>
@@ -84,13 +98,13 @@ const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
         <SectionHeader name="Notas" />
         <DocumentItemsSkeleton show={isLoading} />
         <FlatList
-          data={notebook?.notes ?? []}
+          data={notes ?? []}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item._id}
           style={styles.listContainer}
           renderItem={({ item }) => <NoteItem note={item} />}
         />
-        {notebook?.notes?.length === 0 && (
+        {notes?.length === 0 && (
           <View
             style={{
               height: "100%",
@@ -118,14 +132,30 @@ const NoteBookScreen = ({ notebookId }: { notebookId: string }) => {
         />
       ) : null}
       <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
-        <AlertDialog
-          onConfirm={deleteNotebook}
-          onDismiss={() => setModalVisible(false)}
-          title="¿Deseas eliminar esta libreta?"
-          description="Esta acción no se puede deshacer"
-          confirmButtonLabel="Si, Eliminar"
-          dismissButtonLabel="No, Cancelar"
-        />
+        {mutation.isPending ? (
+          <View
+            style={{
+              padding: 20,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={{ color: Colors.primary, paddingBottom: 20 }}>
+              Eliminando libreta...
+            </Text>
+            <ActivityIndicator color={Colors.primary} />
+          </View>
+        ) : (
+          <AlertDialog
+            onConfirm={deleteNotebook}
+            onDismiss={() => setModalVisible(false)}
+            title="¿Deseas eliminar esta libreta?"
+            description="Esta acción no se puede deshacer"
+            confirmButtonLabel="Si, Eliminar"
+            dismissButtonLabel="No, Cancelar"
+          />
+        )}
       </Modal>
     </>
   );

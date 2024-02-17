@@ -82,11 +82,7 @@ const UserMenuScreen = () => {
         <View style={styles.sectionItem}>
           <Text style={styles.sectionItemName}>Personalización</Text>
           <View style={styles.sectionItemOptions}>
-            <MenuOption
-              name="Modo oscuro (in Progress)"
-              icon="moon"
-              onPress={() => {}}
-            />
+            <MenuOption name="Modo oscuro" icon="moon" onPress={() => {}} />
           </View>
         </View>
       </View>
