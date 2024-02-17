@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
 
 import axiosInstance from "@/config/axios";
@@ -11,10 +12,12 @@ import {
 export default function useCreateNotebook({
   closeModal,
 }: {
-  closeModal: () => void;
+  closeModal?: () => void;
 }) {
   const { token } = useSession();
   const queryClient = useQueryClient();
+  const router = useRouter();
+
   const mutation = useMutation<
     CreateNotebookResDto,
     Error,
@@ -42,7 +45,9 @@ export default function useCreateNotebook({
         text2: data.data.name,
       });
 
-      closeModal();
+      closeModal?.();
+
+      router.push(`/notebook/${data.data._id}`);
     },
   });
 

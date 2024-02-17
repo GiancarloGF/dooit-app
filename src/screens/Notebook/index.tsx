@@ -146,7 +146,7 @@ const CustomBottomSheet = ({
 
   const mutation = useCreateNote({
     closeModal: () => {
-      bottomSheetRef.current?.collapse();
+      bottomSheetRef.current?.close();
       onCloseBottomSheet();
     },
   });

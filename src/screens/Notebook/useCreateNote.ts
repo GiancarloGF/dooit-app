@@ -30,10 +30,11 @@ export default function useCreateNote({
       return response.data;
     },
     onSuccess: (data) => {
+      //TODO: implentar optimistic update
       // // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["notebook"] });
       queryClient.invalidateQueries({ queryKey: ["folder"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       // signIn(data.data.token, data.data.userId);
       Toast.show({
         type: "success",

@@ -157,6 +157,33 @@ const CustomBottomSheet = ({
 }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { keyboardShown, hideKeyboard } = useKeyboard();
+
+  const { userId } = useSession();
+
+  const { id: folderId } = useLocalSearchParams();
+
+  const form = useCreateNotebookForm();
+
+  const mutation = useCreateNotebook({
+    closeModal: () => {
+      bottomSheetRef.current?.close();
+      onCloseBottomSheet();
+    },
+  });
+
+  function onSubmit() {
+    if (!form.isValid) return;
+
+    hideKeyboard();
+
+    mutation.mutate({
+      name: form.getValues("name"),
+      isFeatured: false,
+      userId: userId!,
+      folderId: folderId as string,
+    });
+  }
+
   const snapPointsValues = useMemo(() => {
     if (keyboardShown) {
       return ["65%"];
@@ -188,85 +215,38 @@ const CustomBottomSheet = ({
         }
       }}
     >
-      <BottomSheetContent
-        closeBottomSheet={() => {
-          bottomSheetRef.current?.collapse();
-          onCloseBottomSheet();
-        }}
-        hideKeyboard={hideKeyboard}
-      />
-    </BottomSheet>
-  );
-};
-
-const BottomSheetContent = ({
-  closeBottomSheet,
-  hideKeyboard,
-}: {
-  closeBottomSheet: () => void;
-  hideKeyboard: () => void;
-}) => {
-  const { userId } = useSession();
-
-  const { id: folderId } = useLocalSearchParams();
-
-  const form = useCreateNotebookForm();
-
-  const mutation = useCreateNotebook({
-    closeModal: closeBottomSheet,
-  });
-
-  function onSubmit() {
-    if (!form.isValid) return;
-
-    hideKeyboard();
-
-    mutation.mutate({
-      name: form.getValues("name"),
-      isFeatured: false,
-      userId: userId!,
-      folderId: folderId as string,
-    });
-  }
-
-  return (
-    <View style={styles.sheetContainer}>
-      <View style={styles.sheetHeader}>
-        <Feather name="file-plus" size={24} color={Colors.primary} />
-        <Text style={styles.sheetHeaderTitle}>Nueva Libreta</Text>
-      </View>
-      <View style={styles.sheetContent}>
-        <Controller
-          control={form.control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Nombre"
-              labelColor={Colors.primary}
-              selectionColor={Colors.primary}
-              style={{ color: Colors.primary }}
-              errorText={form.errors.name?.message}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-          name="name"
+      <View style={styles.sheetContainer}>
+        <View style={styles.sheetHeader}>
+          <Feather name="file-plus" size={24} color={Colors.primary} />
+          <Text style={styles.sheetHeaderTitle}>Nueva Libreta</Text>
+        </View>
+        <View style={styles.sheetContent}>
+          <Controller
+            control={form.control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Nombre"
+                labelColor={Colors.primary}
+                selectionColor={Colors.primary}
+                style={{ color: Colors.primary }}
+                errorText={form.errors.name?.message}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+            name="name"
+          />
+        </View>
+        <Button
+          label="Crear"
+          isLoading={mutation.isPending}
+          disabled={!form.isValid}
+          onPress={form.handleSubmit(onSubmit)}
+          style={{ backgroundColor: Colors.primary }}
+          labelColor="white"
         />
-        {/* <TextInput
-          label="Nombre"
-          errorText={undefined}
-          labelColor={Colors.primary}
-        /> */}
       </View>
-      {/* <View style={{ flex: 1 }} /> */}
-      <Button
-        label="Crear"
-        isLoading={mutation.isPending}
-        disabled={!form.isValid}
-        onPress={form.handleSubmit(onSubmit)}
-        style={{ backgroundColor: Colors.primary }}
-        labelColor="white"
-      />
-    </View>
+    </BottomSheet>
   );
 };

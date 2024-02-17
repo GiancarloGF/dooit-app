@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
 
 import axiosInstance from "@/config/axios";
@@ -9,12 +10,13 @@ import {
 } from "@/types/create_folder_dto";
 
 export default function useCreateFolderMutation({
-  afterSuccess,
+  closeModal,
 }: {
-  afterSuccess?: () => void;
+  closeModal?: () => void;
 }) {
   const { token } = useSession();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const mutation = useMutation<
     CreateFolderResDto,
@@ -41,7 +43,9 @@ export default function useCreateFolderMutation({
         text1: data.message,
       });
 
-      afterSuccess?.();
+      closeModal?.();
+
+      router.push(`/folder/${data.data._id}`);
     },
   });
 

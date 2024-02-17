@@ -133,8 +133,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginVertical: 10,
-    paddingLeft: 10,
-    paddingRight: 15,
+    paddingLeft: 4,
+    paddingRight: 4,
   },
   title: {
     textDecorationLine: "line-through",

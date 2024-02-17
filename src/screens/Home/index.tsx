@@ -115,6 +115,15 @@ const HomeScreen = () => {
 
 export default HomeScreen;
 
+const colors = [
+  "#FFEFD7",
+  "#E4FDFF",
+  "#D9FFDA",
+  "#EED8FF",
+  "#FFD8D8",
+  "#D9D9D9",
+];
+
 const CustomBottomSheet = ({
   onCloseBottomSheet,
 }: {
@@ -122,6 +131,32 @@ const CustomBottomSheet = ({
 }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { keyboardShown, hideKeyboard } = useKeyboard();
+  const [colorSelected, setColorSelected] = useState<string>(colors[0]);
+  const { userId } = useSession();
+
+  const form = useCreateFolderForm();
+
+  const mutation = useCreateFolderMutation({
+    closeModal: () => {
+      bottomSheetRef.current?.close();
+      onCloseBottomSheet();
+    },
+  });
+
+  function onSubmit() {
+    if (!form.isValid) return;
+
+    hideKeyboard();
+
+    mutation.mutate({
+      name: form.getValues("name"),
+      isFeatured: false,
+      userId: userId!,
+      label: "",
+      color: colorSelected,
+    });
+  }
+
   const snapPointsValues = useMemo(() => {
     if (keyboardShown) {
       return ["85%"];
@@ -129,6 +164,7 @@ const CustomBottomSheet = ({
       return ["50%"];
     }
   }, [keyboardShown]);
+
   const renderBackdrop = useCallback(
     (props: any) => (
       <BottomSheetBackdrop
@@ -153,110 +189,67 @@ const CustomBottomSheet = ({
         }
       }}
     >
-      <BottomSheetContent
+      <View style={styles.sheetContainer}>
+        <View style={styles.sheetHeader}>
+          <Feather name="folder-plus" size={24} color={Colors.primary} />
+          <Text style={styles.sheetHeaderTitle}>Nueva Carpeta</Text>
+        </View>
+        <View style={styles.sheetContent}>
+          <Controller
+            control={form.control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Nombre"
+                labelColor={Colors.primary}
+                selectionColor={Colors.primary}
+                style={{ color: Colors.primary }}
+                errorText={form.errors.name?.message}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+            name="name"
+          />
+          <View style={styles.colorsSection}>
+            <Text style={styles.colorsText}>Color</Text>
+            <View style={styles.colorsContainer}>
+              {colors.map((color) => (
+                <Pressable
+                  key={color}
+                  onPress={() => setColorSelected(color)}
+                  style={[
+                    styles.colorItem,
+                    {
+                      backgroundColor: color,
+                      borderWidth: colorSelected === color ? 2 : 0,
+                      borderColor: Colors.primary,
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+        </View>
+        {/* <View style={{ flex: 1 }} /> */}
+        <Button
+          label="Crear"
+          isLoading={mutation.isPending}
+          disabled={!form.isValid}
+          onPress={form.handleSubmit(onSubmit)}
+          style={{
+            backgroundColor: !form.isValid ? "gray" : Colors.primary,
+          }}
+          labelColor="white"
+        />
+      </View>
+      {/* <BottomSheetContent
         closeBottomSheet={() => {
           bottomSheetRef.current?.collapse();
           onCloseBottomSheet();
         }}
         hideKeyboard={hideKeyboard}
-      />
+      /> */}
     </BottomSheet>
-  );
-};
-
-const colors = [
-  "#FFEFD7",
-  "#E4FDFF",
-  "#D9FFDA",
-  "#EED8FF",
-  "#FFD8D8",
-  "#D9D9D9",
-];
-
-const BottomSheetContent = ({
-  closeBottomSheet,
-  hideKeyboard,
-}: {
-  closeBottomSheet: () => void;
-  hideKeyboard: () => void;
-}) => {
-  const [colorSelected, setColorSelected] = useState<string>(colors[0]);
-  const { userId } = useSession();
-
-  const form = useCreateFolderForm();
-
-  const mutation = useCreateFolderMutation({
-    afterSuccess: () => closeBottomSheet(),
-  });
-
-  function onSubmit() {
-    if (!form.isValid) return;
-
-    hideKeyboard();
-
-    mutation.mutate({
-      name: form.getValues("name"),
-      isFeatured: false,
-      userId: userId!,
-      label: "",
-      color: colorSelected,
-    });
-  }
-
-  return (
-    <View style={styles.sheetContainer}>
-      <View style={styles.sheetHeader}>
-        <Feather name="folder-plus" size={24} color={Colors.primary} />
-        <Text style={styles.sheetHeaderTitle}>Nueva Carpeta</Text>
-      </View>
-      <View style={styles.sheetContent}>
-        <Controller
-          control={form.control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Nombre"
-              labelColor={Colors.primary}
-              selectionColor={Colors.primary}
-              style={{ color: Colors.primary }}
-              errorText={form.errors.name?.message}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-          name="name"
-        />
-        <View style={styles.colorsSection}>
-          <Text style={styles.colorsText}>Color</Text>
-          <View style={styles.colorsContainer}>
-            {colors.map((color) => (
-              <Pressable
-                key={color}
-                onPress={() => setColorSelected(color)}
-                style={[
-                  styles.colorItem,
-                  {
-                    backgroundColor: color,
-                    borderWidth: colorSelected === color ? 2 : 0,
-                    borderColor: Colors.primary,
-                  },
-                ]}
-              />
-            ))}
-          </View>
-        </View>
-      </View>
-      {/* <View style={{ flex: 1 }} /> */}
-      <Button
-        label="Crear"
-        isLoading={mutation.isPending}
-        disabled={!form.isValid}
-        onPress={form.handleSubmit(onSubmit)}
-        style={{
-          backgroundColor: !form.isValid ? "gray" : Colors.primary,
-        }}
-        labelColor="white"
-      />
-    </View>
   );
 };
